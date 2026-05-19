@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Tableau de Bord</h2>
+
+<div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
+    <!-- Utilisateurs -->
+    <div class="col">
+        <div class="card h-100 border-primary shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">Utilisateurs</h5>
+                <h3 class="display-6">{{ metrics.totalUsers or 0 }}</h3>
+                <p class="card-text text-muted">
+                    <span class="badge bg-success">{{ metrics.activeUsers or 0 }} Actifs</span>
+                    <span class="badge bg-danger">{{ metrics.suspendedUsers or 0 }} Suspendus</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Modération -->
+    <div class="col">
+        <div class="card h-100 border-warning shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-gavel fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">En attente</h5>
+                <h3 class="display-6">{{ metrics.pendingModeration or 0 }}</h3>
+                <p class="card-text text-muted">
+                    Prod: {{ metrics.pendingProducts or 0 }} | Serv: {{ metrics.pendingServices or 0 }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Commandes -->
+    <div class="col">
+        <div class="card h-100 border-success shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Commandes</h5>
+                <h3 class="display-6">{{ metrics.totalOrders or 0 }}</h3>
+                <p class="card-text text-muted">
+                    Vol: {{ metrics.finance.orderVolume or 0 }}€
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Litiges -->
+    <div class="col">
+        <div class="card h-100 border-danger shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">Litiges Ouverts</h5>
+                <h3 class="display-6">{{ metrics.openDisputes or 0 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Audit Logs -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Actions Récentes</h5>
+                <a href="#" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Admin</th>
+                                <th>Action</th>
+                                <th>Cible</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_audit %}
+                            <tr>
+                                <td>{{ log.adminId }}</td>
+                                <td>{{ log.action }}</td>
+                                <td>{{ log.resourceType }}</td>
+                                <td class="small">{{ log.createdAt }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">Aucun log récent</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moderation Items -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">File de Modération</h5>
+                <a href="#" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>ID</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in recent_moderation %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-{{ 'primary' if item.itemType == 'product' else 'info' }}">
+                                        {{ item.itemType }}
+                                    </span>
+                                </td>
+                                <td class="small">{{ item.id }}</td>
+                                <td>{{ item.moderationStatus or 'pending' }}</td>
+                                <td>
+                                    <a href="{{ url_for('products.product_details', product_id=item.id) if item.itemType == 'product' else url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-link p-0">Gérer</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">Aucun item à modérer</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

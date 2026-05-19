@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Détails Utilisateur{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('users.list_users') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Retour à la liste
+    </a>
+</div>
+
+{% if user %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">Profil de {{ user.firstName }} {{ user.lastName }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">ID</div>
+                    <div class="col-sm-8 text-muted">{{ user.id }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Email</div>
+                    <div class="col-sm-8">{{ user.email }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Rôle</div>
+                    <div class="col-sm-8"><span class="badge bg-secondary">{{ user.role }}</span></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Status</div>
+                    <div class="col-sm-8">
+                        {% if user.isActive %}
+                        <span class="badge bg-success">Actif</span>
+                        {% else %}
+                        <span class="badge bg-danger">Suspendu</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if user.suspendedAt %}
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Suspendu le</div>
+                    <div class="col-sm-8">{{ user.suspendedAt }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Raison de suspension</div>
+                    <div class="col-sm-8 text-danger">{{ user.suspensionReason }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Actions d'Administration</h5>
+            </div>
+            <div class="card-body">
+                {% if user.isActive %}
+                <form action="{{ url_for('users.suspend_user', user_id=user.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Raison de la suspension</label>
+                        <textarea name="reason" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger">Suspendre le compte</button>
+                    </div>
+                </form>
+                {% else %}
+                <form action="{{ url_for('users.reactivate_user', user_id=user.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Note de réactivation</label>
+                        <textarea name="reason" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Réactiver le compte</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">Utilisateur non trouvé.</div>
+{% endif %}
+{% endblock %}

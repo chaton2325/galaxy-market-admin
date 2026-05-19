@@ -1,0 +1,26 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 0.5rem;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05rem;
+}
+
+.display-6 {
+    font-weight: bold;
+}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Détails Service{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('services.list_services') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Retour à la liste
+    </a>
+</div>
+
+{% if service %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">{{ service.name }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">ID</div>
+                    <div class="col-sm-8 text-muted">{{ service.id }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Propriétaire (ID)</div>
+                    <div class="col-sm-8">{{ service.ownerId }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Description</div>
+                    <div class="col-sm-8">{{ service.description }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Prix</div>
+                    <div class="col-sm-8">{{ service.price }}€</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Status Modération</div>
+                    <div class="col-sm-8">
+                        {% if service.moderationStatus == 'approved' %}
+                        <span class="badge bg-success">Approuvé</span>
+                        {% elif service.moderationStatus == 'rejected' %}
+                        <span class="badge bg-danger">Rejeté</span>
+                        {% else %}
+                        <span class="badge bg-warning">En attente</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if service.moderationReason %}
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Raison Modération</div>
+                    <div class="col-sm-8 text-danger">{{ service.moderationReason }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Modération</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('services.moderate_service', service_id=service.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Action</label>
+                        <select name="status" class="form-select" required>
+                            <option value="">Choisir...</option>
+                            <option value="approved">Approuver</option>
+                            <option value="rejected">Rejeter</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Raison (si rejeté)</label>
+                        <textarea name="reason" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Valider la modération</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">Service non trouvé.</div>
+{% endif %}
+{% endblock %}
