@@ -6,6 +6,7 @@ from blueprints.users import users_bp
 from blueprints.products import products_bp
 from blueprints.services import services_bp
 from blueprints.moderation import moderation_bp
+from blueprints.audit import audit_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -17,6 +18,7 @@ app.register_blueprint(users_bp, url_prefix='/users')
 app.register_blueprint(products_bp, url_prefix='/products')
 app.register_blueprint(services_bp, url_prefix='/services')
 app.register_blueprint(moderation_bp, url_prefix='/moderation')
+app.register_blueprint(audit_bp, url_prefix='/audit')
 
 @app.route('/')
 def index():

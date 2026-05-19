@@ -3,66 +3,68 @@
 {% block title %}Modération{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">File de Modération</h2>
+<h2 class="page-title">File de Modération</h2>
 
-<div class="card mb-4">
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres de recherche</h5>
+    </div>
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Type</label>
-                <select name="type" class="form-select">
-                    <option value="">Tous</option>
+                <label class="form-label">Type de contenu</label>
+                <select name="type" class="form-select border-0 bg-light">
+                    <option value="">Tous les types</option>
                     <option value="product" {{ 'selected' if item_type == 'product' }}>Produits</option>
                     <option value="service" {{ 'selected' if item_type == 'service' }}>Services</option>
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="">Tous</option>
+                <label class="form-label">Statut actuel</label>
+                <select name="status" class="form-select border-0 bg-light">
+                    <option value="">Tous les statuts</option>
                     <option value="pending" {{ 'selected' if status == 'pending' }}>En attente</option>
                     <option value="approved" {{ 'selected' if status == 'approved' }}>Approuvés</option>
                     <option value="rejected" {{ 'selected' if status == 'rejected' }}>Rejetés</option>
                 </select>
             </div>
             <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                <button type="submit" class="btn btn-gold btn-action w-100">Appliquer les filtres</button>
             </div>
         </form>
     </div>
 </div>
 
 {% if item_type %}
-    <!-- Display single list if type is selected -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Résultats pour {{ item_type }}</h5>
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Résultats : {{ item_type.upper() }}</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
+                            <th>Nom de l'élément</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in data %}
                         <tr>
-                            <td>{{ item.id }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.moderationStatus or 'pending' }}</td>
+                            <td class="fw-bold">{{ item.name }}</td>
                             <td>
-                                <a href="{{ url_for('products.product_details', product_id=item.id) if item_type == 'product' else url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-outline-primary">Gérer</a>
+                                <span class="badge {{ 'bg-warning-subtle text-warning' if (item.moderationStatus or 'pending') == 'pending' else 'bg-success-subtle text-success' if item.moderationStatus == 'approved' else 'bg-danger-subtle text-danger' }}">
+                                    {{ (item.moderationStatus or 'pending').upper() }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('products.product_details', product_id=item.id) if item_type == 'product' else url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-outline-primary btn-action">Expertiser</a>
                             </td>
                         </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-3">Aucun élément trouvé.</td>
-                        </tr>
+                        <tr><td colspan="3" class="text-center py-5 text-muted">Aucun élément ne correspond aux critères</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -70,12 +72,12 @@
         </div>
     </div>
 {% else %}
-    <!-- Display both lists if no type is selected -->
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Produits</h5>
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary">Derniers Produits</h5>
+                    <i class="fas fa-box text-muted"></i>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -84,11 +86,11 @@
                                 {% for item in data.get('products', []) %}
                                 <tr>
                                     <td>{{ item.name }}</td>
-                                    <td>{{ item.moderationStatus or 'pending' }}</td>
-                                    <td><a href="{{ url_for('products.product_details', product_id=item.id) }}" class="btn btn-sm btn-link">Gérer</a></td>
+                                    <td><span class="badge bg-warning-subtle text-warning small">{{ (item.moderationStatus or 'pending').upper() }}</span></td>
+                                    <td class="text-end"><a href="{{ url_for('products.product_details', product_id=item.id) }}" class="btn btn-sm btn-link p-0 text-decoration-none">Gérer</a></td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="3" class="text-center py-3">Rien à modérer</td></tr>
+                                <tr><td colspan="3" class="text-center py-4 text-muted small">Aucun produit en attente</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -98,8 +100,9 @@
         </div>
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Services</h5>
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-info">Derniers Services</h5>
+                    <i class="fas fa-concierge-bell text-muted"></i>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -108,11 +111,11 @@
                                 {% for item in data.get('services', []) %}
                                 <tr>
                                     <td>{{ item.name }}</td>
-                                    <td>{{ item.moderationStatus or 'pending' }}</td>
-                                    <td><a href="{{ url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-link">Gérer</a></td>
+                                    <td><span class="badge bg-warning-subtle text-warning small">{{ (item.moderationStatus or 'pending').upper() }}</span></td>
+                                    <td class="text-end"><a href="{{ url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-link p-0 text-decoration-none">Gérer</a></td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="3" class="text-center py-3">Rien à modérer</td></tr>
+                                <tr><td colspan="3" class="text-center py-4 text-muted small">Aucun service en attente</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>

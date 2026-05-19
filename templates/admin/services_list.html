@@ -3,45 +3,55 @@
 {% block title %}Services{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Liste des Services</h2>
-</div>
+<h2 class="page-title">Gestion des Services</h2>
 
 <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Catalogue des Services</h5>
+            <div class="input-group input-group-sm w-auto">
+                <input type="text" class="form-control" placeholder="Rechercher...">
+                <button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Prix</th>
+                        <th>Service</th>
+                        <th>Prix / Taux</th>
                         <th>Modération</th>
-                        <th>Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for service in services %}
                     <tr>
-                        <td class="small text-muted">{{ service.id }}</td>
-                        <td>{{ service.name }}</td>
-                        <td>{{ service.price }}€</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ service.name }}</div>
+                            <code class="small text-muted">{{ service.id[:8] }}...</code>
+                        </td>
+                        <td><span class="fw-bold text-primary">${{ service.price }}</span></td>
                         <td>
                             {% if service.moderationStatus == 'approved' %}
-                            <span class="badge bg-success">Approuvé</span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">APPROUVÉ</span>
                             {% elif service.moderationStatus == 'rejected' %}
-                            <span class="badge bg-danger">Rejeté</span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle">REJETÉ</span>
                             {% else %}
-                            <span class="badge bg-warning">En attente</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle">EN ATTENTE</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <a href="{{ url_for('services.service_details', service_id=service.id) }}" class="btn btn-sm btn-outline-primary">Détails</a>
+                        <td class="text-end">
+                            <a href="{{ url_for('services.service_details', service_id=service.id) }}" class="btn btn-sm btn-outline-primary btn-action">
+                                <i class="fas fa-info-circle"></i> Examiner
+                            </a>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4">Aucun service trouvé.</td>
+                        <td colspan="4" class="text-center py-5 text-muted">Aucun service répertorié</td>
                     </tr>
                     {% endfor %}
                 </tbody>

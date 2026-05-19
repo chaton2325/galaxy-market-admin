@@ -19,7 +19,18 @@ def list_products():
     response = APIClient.get('/products', params=params)
     products = []
     if response and response.status_code == 200:
-        products = response.json()
+        data = response.json()
+        if isinstance(data, list):
+            products = data
+        elif isinstance(data, dict):
+            products = data.get('products') or data.get('data') or data.get('items') or []
+            
+        # Normalization for MongoDB _id
+        for p in products:
+            if isinstance(p, dict):
+                if 'id' not in p and '_id' in p:
+                    p['id'] = p['_id']
+            
     return render_template('admin/products_list.html', products=products)
 
 @products_bp.route('/<product_id>')
@@ -28,6 +39,10 @@ def product_details(product_id):
     product = None
     if response and response.status_code == 200:
         product = response.json()
+        if product and isinstance(product, dict):
+            if 'id' not in product and '_id' in product:
+                product['id'] = product['_id']
+                
     return render_template('admin/product_details.html', product=product)
 
 @products_bp.route('/<product_id>/moderate', methods=['POST'])

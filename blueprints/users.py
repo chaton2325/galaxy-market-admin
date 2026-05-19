@@ -14,7 +14,13 @@ def list_users():
     response = APIClient.get(f'/users?page={page}')
     users = []
     if response and response.status_code == 200:
-        users = response.json()
+        data = response.json()
+        # Handle cases where response might be wrapped in an object or a list
+        if isinstance(data, list):
+            users = data
+        elif isinstance(data, dict):
+            users = data.get('data') or data.get('users') or []
+            
     return render_template('admin/users_list.html', users=users)
 
 @users_bp.route('/<user_id>')

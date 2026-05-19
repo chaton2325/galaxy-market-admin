@@ -3,142 +3,171 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Tableau de Bord</h2>
+<h2 class="page-title">Tableau de Bord</h2>
 
-<div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
+<div class="row g-4 mb-5">
     <!-- Utilisateurs -->
-    <div class="col">
-        <div class="card h-100 border-primary shadow-sm">
-            <div class="card-body text-center">
-                <i class="fas fa-users fa-2x text-primary mb-2"></i>
-                <h5 class="card-title">Utilisateurs</h5>
-                <h3 class="display-6">{{ metrics.totalUsers or 0 }}</h3>
-                <p class="card-text text-muted">
-                    <span class="badge bg-success">{{ metrics.activeUsers or 0 }} Actifs</span>
-                    <span class="badge bg-danger">{{ metrics.suspendedUsers or 0 }} Suspendus</span>
-                </p>
+    <div class="col-md-3">
+        <div class="card h-100 metric-card shadow-sm">
+            <div class="card-body">
+                <div class="metric-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-users fa-lg"></i>
+                </div>
+                <h6 class="text-muted fw-bold">Utilisateurs</h6>
+                <h2 class="fw-bold mb-2">{{ metrics.totalUsers or 0 }}</h2>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-success-subtle text-success">{{ metrics.activeUsers or 0 }} actifs</span>
+                    <span class="badge bg-danger-subtle text-danger">{{ metrics.suspendedUsers or 0 }} susp.</span>
+                </div>
             </div>
         </div>
     </div>
     <!-- Modération -->
-    <div class="col">
-        <div class="card h-100 border-warning shadow-sm">
-            <div class="card-body text-center">
-                <i class="fas fa-gavel fa-2x text-warning mb-2"></i>
-                <h5 class="card-title">En attente</h5>
-                <h3 class="display-6">{{ metrics.pendingModeration or 0 }}</h3>
-                <p class="card-text text-muted">
-                    Prod: {{ metrics.pendingProducts or 0 }} | Serv: {{ metrics.pendingServices or 0 }}
-                </p>
+    <div class="col-md-3">
+        <div class="card h-100 metric-card shadow-sm">
+            <div class="card-body">
+                <div class="metric-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-gavel fa-lg"></i>
+                </div>
+                <h6 class="text-muted fw-bold">En attente</h6>
+                <h2 class="fw-bold mb-2">{{ metrics.pendingModeration or 0 }}</h2>
+                <small class="text-muted">Prod: {{ metrics.pendingProducts or 0 }} | Serv: {{ metrics.pendingServices or 0 }}</small>
             </div>
         </div>
     </div>
     <!-- Commandes -->
-    <div class="col">
-        <div class="card h-100 border-success shadow-sm">
-            <div class="card-body text-center">
-                <i class="fas fa-shopping-cart fa-2x text-success mb-2"></i>
-                <h5 class="card-title">Commandes</h5>
-                <h3 class="display-6">{{ metrics.totalOrders or 0 }}</h3>
-                <p class="card-text text-muted">
-                    Vol: {{ metrics.finance.orderVolume or 0 }}€
-                </p>
+    <div class="col-md-3">
+        <div class="card h-100 metric-card shadow-sm">
+            <div class="card-body">
+                <div class="metric-icon bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-shopping-cart fa-lg"></i>
+                </div>
+                <h6 class="text-muted fw-bold">Commandes</h6>
+                <h2 class="fw-bold mb-2">{{ metrics.totalOrders or 0 }}</h2>
+                <span class="badge badge-gold">Vol: ${{ metrics.finance.orderVolume or 0 }}</span>
             </div>
         </div>
     </div>
     <!-- Litiges -->
-    <div class="col">
-        <div class="card h-100 border-danger shadow-sm">
-            <div class="card-body text-center">
-                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
-                <h5 class="card-title">Litiges Ouverts</h5>
-                <h3 class="display-6">{{ metrics.openDisputes or 0 }}</h3>
+    <div class="col-md-3">
+        <div class="card h-100 metric-card shadow-sm">
+            <div class="card-body">
+                <div class="metric-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="fas fa-exclamation-triangle fa-lg"></i>
+                </div>
+                <h6 class="text-muted fw-bold">Litiges Ouverts</h6>
+                <h2 class="fw-bold mb-2">{{ metrics.openDisputes or 0 }}</h2>
+                <small class="text-muted">Actions requises immédiates</small>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Audit Logs -->
-    <div class="col-md-6 mb-4">
+<div class="row mb-5">
+    <!-- Graphique Volume Financier -->
+    <div class="col-lg-8">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Actions Récentes</h5>
-                <a href="#" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+            <div class="card-header">
+                <h5 class="mb-0">Aperçu Financier</h5>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Admin</th>
-                                <th>Action</th>
-                                <th>Cible</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in recent_audit %}
-                            <tr>
-                                <td>{{ log.adminId }}</td>
-                                <td>{{ log.action }}</td>
-                                <td>{{ log.resourceType }}</td>
-                                <td class="small">{{ log.createdAt }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center py-3">Aucun log récent</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="card-body">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="financeChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Moderation Items -->
-    <div class="col-md-6 mb-4">
+    <!-- Répartition Utilisateurs -->
+    <div class="col-lg-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">File de Modération</h5>
-                <a href="#" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+            <div class="card-header">
+                <h5 class="mb-0">Répartition Membres</h5>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Type</th>
-                                <th>ID</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in recent_moderation %}
-                            <tr>
-                                <td>
-                                    <span class="badge bg-{{ 'primary' if item.itemType == 'product' else 'info' }}">
-                                        {{ item.itemType }}
-                                    </span>
-                                </td>
-                                <td class="small">{{ item.id }}</td>
-                                <td>{{ item.moderationStatus or 'pending' }}</td>
-                                <td>
-                                    <a href="{{ url_for('products.product_details', product_id=item.id) if item.itemType == 'product' else url_for('services.service_details', service_id=item.id) }}" class="btn btn-sm btn-link p-0">Gérer</a>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center py-3">Aucun item à modérer</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="usersChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+        };
+
+        const financeCtx = document.getElementById('financeChart').getContext('2d');
+        new Chart(financeCtx, {
+            type: 'line',
+            data: {
+                labels: ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'Actuel'],
+                datasets: [{
+                    label: 'Commandes ($)',
+                    data: [0, 0, 0, 0, 0, {{ metrics.finance.orderVolume or 0 }}],
+                    borderColor: '#bf953f',
+                    backgroundColor: 'rgba(191, 149, 63, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#bf953f'
+                }, {
+                    label: 'Factures ($)',
+                    data: [0, 0, 0, 0, 0, {{ metrics.finance.invoiceVolume or 0 }}],
+                    borderColor: '#12161f',
+                    backgroundColor: 'rgba(18, 22, 31, 0.05)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#12161f'
+                }]
+            },
+            options: {
+                ...commonOptions,
+                plugins: {
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 }
+                    },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        ticks: { callback: value => '$' + value }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        new Chart(usersCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actifs', 'Suspendus'],
+                datasets: [{
+                    data: [{{ metrics.activeUsers or 0 }}, {{ metrics.suspendedUsers or 0 }}],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                ...commonOptions,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20 } }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

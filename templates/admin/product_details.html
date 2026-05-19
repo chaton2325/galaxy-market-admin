@@ -14,35 +14,36 @@
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white">
-                <h4 class="mb-0">{{ product.name }}</h4>
+                <h4 class="mb-0">{{ product.name or 'Sans nom' }}</h4>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ product.id }}</div>
+                    <div class="col-sm-8 text-muted">{{ product.id or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Propriétaire (ID)</div>
-                    <div class="col-sm-8">{{ product.ownerId }}</div>
+                    <div class="col-sm-8">{{ product.ownerId or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Description</div>
-                    <div class="col-sm-8">{{ product.description }}</div>
+                    <div class="col-sm-8">{{ product.description or 'Aucune description' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Prix</div>
-                    <div class="col-sm-8">{{ product.price }}€</div>
+                    <div class="col-sm-8">${{ product.price | default(0) }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Quantité</div>
-                    <div class="col-sm-8">{{ product.quantity }}</div>
+                    <div class="col-sm-8">{{ product.quantity | default('Non spécifiée') }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Status Modération</div>
                     <div class="col-sm-8">
-                        {% if product.moderationStatus == 'approved' %}
+                        {% set status = product.moderationStatus | default('pending') %}
+                        {% if status == 'approved' %}
                         <span class="badge bg-success">Approuvé</span>
-                        {% elif product.moderationStatus == 'rejected' %}
+                        {% elif status == 'rejected' %}
                         <span class="badge bg-danger">Rejeté</span>
                         {% else %}
                         <span class="badge bg-warning">En attente</span>

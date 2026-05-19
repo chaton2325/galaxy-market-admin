@@ -19,7 +19,18 @@ def list_services():
     response = APIClient.get('/services', params=params)
     services = []
     if response and response.status_code == 200:
-        services = response.json()
+        data = response.json()
+        if isinstance(data, list):
+            services = data
+        elif isinstance(data, dict):
+            services = data.get('services') or data.get('data') or data.get('items') or []
+            
+        # Normalization for MongoDB _id
+        for s in services:
+            if isinstance(s, dict):
+                if 'id' not in s and '_id' in s:
+                    s['id'] = s['_id']
+            
     return render_template('admin/services_list.html', services=services)
 
 @services_bp.route('/<service_id>')
@@ -28,6 +39,10 @@ def service_details(service_id):
     service = None
     if response and response.status_code == 200:
         service = response.json()
+        if service and isinstance(service, dict):
+            if 'id' not in service and '_id' in service:
+                service['id'] = service['_id']
+                
     return render_template('admin/service_details.html', service=service)
 
 @services_bp.route('/<service_id>/moderate', methods=['POST'])

@@ -14,20 +14,20 @@
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white">
-                <h4 class="mb-0">Profil de {{ user.firstName }} {{ user.lastName }}</h4>
+                <h4 class="mb-0">Profil de {{ user.firstName | default('') }} {{ user.lastName | default('') }}</h4>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ user.id }}</div>
+                    <div class="col-sm-8 text-muted">{{ user.id or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Email</div>
-                    <div class="col-sm-8">{{ user.email }}</div>
+                    <div class="col-sm-8">{{ user.email or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Rôle</div>
-                    <div class="col-sm-8"><span class="badge bg-secondary">{{ user.role }}</span></div>
+                    <div class="col-sm-8"><span class="badge bg-secondary">{{ user.role or 'USER' }}</span></div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Status</div>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Raison de suspension</div>
-                    <div class="col-sm-8 text-danger">{{ user.suspensionReason }}</div>
+                    <div class="col-sm-8 text-danger">{{ user.suspensionReason or 'Non spécifiée' }}</div>
                 </div>
                 {% endif %}
             </div>

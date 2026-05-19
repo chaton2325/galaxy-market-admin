@@ -3,47 +3,65 @@
 {% block title %}Produits{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Liste des Produits</h2>
-</div>
+<h2 class="page-title">Gestion des Produits</h2>
 
 <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Inventaire Global</h5>
+            <div class="input-group input-group-sm w-auto">
+                <input type="text" class="form-control" placeholder="Nom ou ID...">
+                <button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
+                        <th>Produit</th>
                         <th>Prix</th>
-                        <th>Quantité</th>
+                        <th>Stock</th>
                         <th>Modération</th>
-                        <th>Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for product in products %}
                     <tr>
-                        <td class="small text-muted">{{ product.id }}</td>
-                        <td>{{ product.name }}</td>
-                        <td>{{ product.price }}€</td>
-                        <td>{{ product.quantity }}</td>
                         <td>
-                            {% if product.moderationStatus == 'approved' %}
-                            <span class="badge bg-success">Approuvé</span>
-                            {% elif product.moderationStatus == 'rejected' %}
-                            <span class="badge bg-danger">Rejeté</span>
+                            <div class="fw-bold text-dark">{{ product.name or 'Sans nom' }}</div>
+                            <code class="small text-muted">{{ (product.id or 'N/A')[:8] }}...</code>
+                        </td>
+                        <td><span class="fw-bold">${{ product.price | default(0) }}</span></td>
+                        <td>
+                            {% set qty = product.quantity | default(0) %}
+                            {% if qty > 0 %}
+                            <span class="badge bg-success-subtle text-success">{{ qty }} en stock</span>
                             {% else %}
-                            <span class="badge bg-warning">En attente</span>
+                            <span class="badge bg-danger-subtle text-danger">Rupture / N/A</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ url_for('products.product_details', product_id=product.id) }}" class="btn btn-sm btn-outline-primary">Détails</a>
+                            {% set status = product.moderationStatus | default('pending') %}
+                            {% if status == 'approved' %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>APPROUVÉ</span>
+                            {% elif status == 'rejected' %}
+                            <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>REJETÉ</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>ATTENTE</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('products.product_details', product_id=product.id) }}" class="btn btn-sm btn-outline-primary btn-action">
+                                <i class="fas fa-edit"></i> Détails
+                            </a>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-4">Aucun produit trouvé.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">Aucun produit dans le catalogue</td>
                     </tr>
                     {% endfor %}
                 </tbody>

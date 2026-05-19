@@ -21,4 +21,16 @@ def index():
     if response and response.status_code == 200:
         data = response.json()
         
+        # Normalization for all lists in data
+        if isinstance(data, dict):
+            for key in data:
+                if isinstance(data[key], list):
+                    for item in data[key]:
+                        if isinstance(item, dict) and 'id' not in item and '_id' in item:
+                            item['id'] = item['_id']
+        elif isinstance(data, list):
+             for item in data:
+                if isinstance(item, dict) and 'id' not in item and '_id' in item:
+                    item['id'] = item['_id']
+        
     return render_template('admin/moderation.html', data=data, item_type=item_type, status=status)

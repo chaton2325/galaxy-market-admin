@@ -14,31 +14,32 @@
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white">
-                <h4 class="mb-0">{{ service.name }}</h4>
+                <h4 class="mb-0">{{ service.name or 'Sans nom' }}</h4>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ service.id }}</div>
+                    <div class="col-sm-8 text-muted">{{ service.id or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Propriétaire (ID)</div>
-                    <div class="col-sm-8">{{ service.ownerId }}</div>
+                    <div class="col-sm-8">{{ service.ownerId or 'N/A' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Description</div>
-                    <div class="col-sm-8">{{ service.description }}</div>
+                    <div class="col-sm-8">{{ service.description or 'Aucune description' }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Prix</div>
-                    <div class="col-sm-8">{{ service.price }}€</div>
+                    <div class="col-sm-8">${{ service.price | default(0) }}</div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-4 fw-bold">Status Modération</div>
                     <div class="col-sm-8">
-                        {% if service.moderationStatus == 'approved' %}
+                        {% set status = service.moderationStatus | default('pending') %}
+                        {% if status == 'approved' %}
                         <span class="badge bg-success">Approuvé</span>
-                        {% elif service.moderationStatus == 'rejected' %}
+                        {% elif status == 'rejected' %}
                         <span class="badge bg-danger">Rejeté</span>
                         {% else %}
                         <span class="badge bg-warning">En attente</span>
