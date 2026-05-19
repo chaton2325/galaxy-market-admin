@@ -3,53 +3,59 @@
 {% block title %}Utilisateurs{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Gestion des Utilisateurs</h2>
-
-<div class="card shadow-sm">
-    <div class="card-header bg-white py-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Répertoire des membres</h5>
-            <div class="input-group input-group-sm w-auto">
-                <input type="text" class="form-control" placeholder="Rechercher...">
-                <button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
-            </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Annuaire des Membres</h2>
+    <div class="d-flex gap-2">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0" placeholder="Rechercher un membre..." style="width: 250px;">
         </div>
     </div>
+</div>
+
+<div class="card border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>Identifiant</th>
-                        <th>Email / Utilisateur</th>
-                        <th>Rôle</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th>UTILISATEUR</th>
+                        <th>RÔLE</th>
+                        <th>STATUT</th>
+                        <th>INSCRIPTION</th>
+                        <th class="text-end">ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td><code class="small text-muted">{{ user.id[:8] }}...</code></td>
                         <td>
-                            <div class="fw-bold">{{ user.firstName }} {{ user.lastName }}</div>
-                            <div class="small text-muted">{{ user.email }}</div>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-user text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ user.firstName | default('') }} {{ user.lastName | default('') }}</div>
+                                    <div class="small text-muted">{{ user.email }}</div>
+                                </div>
+                            </div>
                         </td>
                         <td>
-                            <span class="badge {{ 'bg-dark' if user.role == 'ADMIN' else 'bg-secondary' }} bg-opacity-10 text-{{ 'dark' if user.role == 'ADMIN' else 'secondary' }}">
-                                {{ user.role }}
+                            <span class="badge {{ 'bg-dark' if user.role == 'ADMIN' else 'bg-light text-muted border' }}">
+                                {{ user.role or 'USER' }}
                             </span>
                         </td>
                         <td>
                             {% if user.isActive %}
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">ACTIF</span>
+                            <span class="badge badge-soft-success"><i class="fas fa-check-circle me-1"></i>ACTIF</span>
                             {% else %}
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">SUSPENDU</span>
+                            <span class="badge badge-soft-danger"><i class="fas fa-ban me-1"></i>SUSPENDU</span>
                             {% endif %}
                         </td>
+                        <td><span class="text-muted small">N/A</span></td>
                         <td class="text-end">
-                            <a href="{{ url_for('users.user_details', user_id=user.id) }}" class="btn btn-sm btn-outline-primary btn-action">
-                                <i class="fas fa-eye"></i> Gérer
+                            <a href="{{ url_for('users.user_details', user_id=user.id) }}" class="btn btn-sm btn-light border fw-bold px-3">
+                                Profil
                             </a>
                         </td>
                     </tr>
@@ -63,12 +69,4 @@
         </div>
     </div>
 </div>
-
-<nav class="mt-4">
-    <ul class="pagination justify-content-center">
-        <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item disabled"><a class="page-link" href="#">Suivant</a></li>
-    </ul>
-</nav>
 {% endblock %}

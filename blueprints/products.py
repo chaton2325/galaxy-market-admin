@@ -25,11 +25,9 @@ def list_products():
         elif isinstance(data, dict):
             products = data.get('products') or data.get('data') or data.get('items') or []
             
-        # Normalization for MongoDB _id
         for p in products:
-            if isinstance(p, dict):
-                if 'id' not in p and '_id' in p:
-                    p['id'] = p['_id']
+            if isinstance(p, dict) and 'id' not in p and '_id' in p:
+                p['id'] = p['_id']
             
     return render_template('admin/products_list.html', products=products)
 
@@ -59,3 +57,24 @@ def moderate_product(product_id):
     else:
         flash('Erreur lors de la modération.', 'danger')
     return redirect(url_for('products.product_details', product_id=product_id))
+
+@products_bp.route('/<product_id>/archive', methods=['POST'])
+def archive_product(product_id):
+    owner_id = request.form.get('ownerId')
+    response = APIClient.patch(f'/products/{product_id}/archive', params={'ownerId': owner_id})
+    if response and response.status_code == 200:
+        flash('Produit archivé.', 'success')
+    else:
+        flash('Erreur lors de l\'archivage.', 'danger')
+    return redirect(url_for('products.product_details', product_id=product_id))
+
+@products_bp.route('/<product_id>/delete', methods=['POST'])
+def delete_product(product_id):
+    owner_id = request.form.get('ownerId')
+    response = APIClient.delete(f'/products/{product_id}', params={'ownerId': owner_id})
+    if response and response.status_code == 200:
+        flash('Produit supprimé.', 'success')
+        return redirect(url_for('products.list_products'))
+    else:
+        flash('Erreur lors de la suppression.', 'danger')
+        return redirect(url_for('products.product_details', product_id=product_id))

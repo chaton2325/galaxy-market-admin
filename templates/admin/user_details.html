@@ -1,90 +1,165 @@
 {% extends "base.html" %}
 
-{% block title %}Détails Utilisateur{% endblock %}
+{% block title %}Profil Utilisateur{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <a href="{{ url_for('users.list_users') }}" class="btn btn-sm btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Retour à la liste
+    <a href="{{ url_for('users.list_users') }}" class="text-decoration-none text-muted fw-bold small">
+        <i class="fas fa-arrow-left me-1"></i> RETOUR À LA LISTE
     </a>
 </div>
 
 {% if user %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h4 class="mb-0">Profil de {{ user.firstName | default('') }} {{ user.lastName | default('') }}</h4>
+<div class="row g-4">
+    <!-- Colonne Gauche : Infos -->
+    <div class="col-lg-8">
+        <div class="card border-0 mb-4">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-id-card me-2 text-primary"></i> IDENTITÉ DU MEMBRE
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ user.id or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Email</div>
-                    <div class="col-sm-8">{{ user.email or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Rôle</div>
-                    <div class="col-sm-8"><span class="badge bg-secondary">{{ user.role or 'USER' }}</span></div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Status</div>
-                    <div class="col-sm-8">
-                        {% if user.isActive %}
-                        <span class="badge bg-success">Actif</span>
-                        {% else %}
-                        <span class="badge bg-danger">Suspendu</span>
-                        {% endif %}
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-label">Prénom</div>
+                        <div class="info-value">{{ user.firstName or 'N/A' }}</div>
+                        
+                        <div class="info-label">Nom</div>
+                        <div class="info-value">{{ user.lastName or 'N/A' }}</div>
+                        
+                        <div class="info-label">Ville</div>
+                        <div class="info-value">{{ user.city or 'Non renseignée' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Adresse Email</div>
+                        <div class="info-value text-primary fw-bold">{{ user.email }}</div>
+                        
+                        <div class="info-label">Rôle Système</div>
+                        <div class="info-value">
+                             <span class="badge {{ 'bg-dark' if user.role == 'ADMIN' else 'bg-light text-muted border' }}">
+                                {{ user.role or 'USER' }}
+                            </span>
+                        </div>
+                        
+                        <div class="info-label">Statut Actuel</div>
+                        <div class="info-value">
+                            {% if user.isActive %}
+                            <span class="badge badge-soft-success">COMPTE ACTIF</span>
+                            {% else %}
+                            <span class="badge badge-soft-danger">COMPTE SUSPENDU</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% if user.suspendedAt %}
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Suspendu le</div>
-                    <div class="col-sm-8">{{ user.suspendedAt }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Raison de suspension</div>
-                    <div class="col-sm-8 text-danger">{{ user.suspensionReason or 'Non spécifiée' }}</div>
-                </div>
-                {% endif %}
             </div>
         </div>
+
+        {% if user.suspendedAt %}
+        <div class="card border-0 border-start border-4 border-danger shadow-sm">
+            <div class="card-body p-4">
+                <h6 class="text-danger fw-bold mb-3"><i class="fas fa-exclamation-triangle me-2"></i>DÉTAILS DE LA SUSPENSION</h6>
+                <div class="row small">
+                    <div class="col-sm-4"><strong>Date de suspension :</strong></div>
+                    <div class="col-sm-8 text-muted mb-2">{{ user.suspendedAt }}</div>
+                    <div class="col-sm-4"><strong>Raison invoquée :</strong></div>
+                    <div class="col-sm-8 text-dark">{{ user.suspensionReason or 'Aucune raison spécifiée' }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">Actions d'Administration</h5>
+    <!-- Colonne Droite : Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                MODIFICATION RAPIDE
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
+                <form action="{{ url_for('users.update_user', user_id=user.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small">Prénom</label>
+                        <input type="text" name="firstName" class="form-control form-control-sm" value="{{ user.firstName or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Nom</label>
+                        <input type="text" name="lastName" class="form-control form-control-sm" value="{{ user.lastName or '' }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small">Ville</label>
+                        <input type="text" name="city" class="form-control form-control-sm" value="{{ user.city or '' }}">
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 btn-sm fw-bold">METTRE À JOUR</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0">
+            <div class="card-header">
+                SÉCURITÉ & ACCÈS
+            </div>
+            <div class="card-body p-4">
                 {% if user.isActive %}
-                <form action="{{ url_for('users.suspend_user', user_id=user.id) }}" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Raison de la suspension</label>
-                        <textarea name="reason" class="form-control" rows="2" required></textarea>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-danger">Suspendre le compte</button>
-                    </div>
-                </form>
+                <button class="btn btn-outline-danger w-100 btn-sm fw-bold mb-3" data-bs-toggle="modal" data-bs-target="#suspendModal">
+                    SUSPENDRE LE COMPTE
+                </button>
                 {% else %}
-                <form action="{{ url_for('users.reactivate_user', user_id=user.id) }}" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Note de réactivation</label>
-                        <textarea name="reason" class="form-control" rows="2" required></textarea>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">Réactiver le compte</button>
-                    </div>
-                </form>
+                <button class="btn btn-outline-success w-100 btn-sm fw-bold mb-3" data-bs-toggle="modal" data-bs-target="#reactivateModal">
+                    RÉACTIVER LE COMPTE
+                </button>
                 {% endif %}
+                <button class="btn btn-link text-danger w-100 btn-sm small text-decoration-none" onclick="return confirm('Action irréversible ! Confirmer ?')">
+                    Supprimer définitivement
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modals Action -->
+<div class="modal fade" id="suspendModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <form action="{{ url_for('users.suspend_user', user_id=user.id) }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger">Suspendre l'utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">L'utilisateur ne pourra plus se connecter à la plateforme.</p>
+                    <label class="form-label">Motif de la suspension</label>
+                    <textarea name="reason" class="form-control" rows="3" required placeholder="Décrivez la raison..."></textarea>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">SUSPENDRE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <form action="{{ url_for('users.reactivate_user', user_id=user.id) }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-success">Réactiver l'utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">L'accès sera rétabli immédiatement.</p>
+                    <label class="form-label">Note de réactivation</label>
+                    <textarea name="reason" class="form-control" rows="3" required placeholder="Commentaires..."></textarea>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold">RÉACTIVER</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% else %}
-<div class="alert alert-warning">Utilisateur non trouvé.</div>
+<div class="alert alert-light border shadow-sm">Utilisateur introuvable dans le système.</div>
 {% endif %}
 {% endblock %}

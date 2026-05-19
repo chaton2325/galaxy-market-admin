@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Catégories{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Management des Catégories</h2>
+
+<div class="row g-4">
+    <!-- Formulaire -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white rounded-top">
+                NOUVELLE CATÉGORIE
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">NOM DE LA CATÉGORIE</label>
+                        <input type="text" name="name" class="form-control bg-light border-0" required placeholder="ex: Électronique, Design...">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">DOMAINE D'APPLICATION</label>
+                        <select name="scope" class="form-select bg-light border-0" required>
+                            <option value="PRODUCT">📦 PRODUITS</option>
+                            <option value="SERVICE">🛠️ SERVICES</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 fw-bold">CRÉER LA CATÉGORIE</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-4 p-3 bg-white rounded shadow-sm border-start border-4 border-primary">
+            <p class="small text-muted mb-0">
+                <i class="fas fa-info-circle me-2 text-primary"></i>
+                Les catégories permettent de segmenter l'offre du Galaxy Market pour faciliter la recherche des clients.
+            </p>
+        </div>
+    </div>
+
+    <!-- Liste (Placeholder stylisé) -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                CATÉGORIES ACTIVES
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>NOM</th>
+                                <th>SCOPE</th>
+                                <th class="text-end">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-database fa-2x mb-3 opacity-25"></i>
+                                        <p class="mb-0">En attente de synchronisation avec l'API...</p>
+                                        <small>Consultez les <strong>Audit Logs</strong> pour voir les créations récentes.</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

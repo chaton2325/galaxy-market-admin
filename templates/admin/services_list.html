@@ -3,49 +3,56 @@
 {% block title %}Services{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Gestion des Services</h2>
-
-<div class="card shadow-sm">
-    <div class="card-header bg-white py-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Catalogue des Services</h5>
-            <div class="input-group input-group-sm w-auto">
-                <input type="text" class="form-control" placeholder="Rechercher...">
-                <button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Catalogue Services</h2>
+    <div class="d-flex gap-2">
+        <button class="btn btn-gold btn-sm"><i class="fas fa-plus me-1"></i> NOUVEAU</button>
     </div>
+</div>
+
+<div class="card border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>Service</th>
-                        <th>Prix / Taux</th>
-                        <th>Modération</th>
-                        <th class="text-end">Actions</th>
+                        <th>SERVICE</th>
+                        <th>TARIFICATION</th>
+                        <th>MODÉRATION</th>
+                        <th class="text-end">ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for service in services %}
                     <tr>
                         <td>
-                            <div class="fw-bold text-dark">{{ service.name }}</div>
-                            <code class="small text-muted">{{ service.id[:8] }}...</code>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center text-info" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-concierge-bell"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ service.get('name', 'N/A') }}</div>
+                                    <div class="small text-muted">ID: {{ service.get('id', 'N/A')[:8] }}</div>
+                                </div>
+                            </div>
                         </td>
-                        <td><span class="fw-bold text-primary">${{ service.price }}</span></td>
                         <td>
-                            {% if service.moderationStatus == 'approved' %}
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">APPROUVÉ</span>
-                            {% elif service.moderationStatus == 'rejected' %}
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle">REJETÉ</span>
+                            <div class="fw-bold text-primary">${{ service.get('price', 0) }}</div>
+                            <div class="small text-muted">Abonnement / Taux</div>
+                        </td>
+                        <td>
+                            {% set status = service.get('moderationStatus', 'pending') %}
+                            {% if status == 'approved' %}
+                            <span class="badge badge-soft-success">APPROUVÉ</span>
+                            {% elif status == 'rejected' %}
+                            <span class="badge badge-soft-danger">REJETÉ</span>
                             {% else %}
-                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle">EN ATTENTE</span>
+                            <span class="badge badge-soft-warning text-dark">PENDING</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{{ url_for('services.service_details', service_id=service.id) }}" class="btn btn-sm btn-outline-primary btn-action">
-                                <i class="fas fa-info-circle"></i> Examiner
+                            <a href="{{ url_for('services.service_details', service_id=service.get('id')) }}" class="btn btn-sm btn-outline-dark border-0 fw-bold">
+                                <i class="fas fa-chevron-right"></i>
                             </a>
                         </td>
                     </tr>

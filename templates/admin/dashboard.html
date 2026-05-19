@@ -3,88 +3,105 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Tableau de Bord</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Vue d'ensemble</h2>
+    <div class="text-muted small fw-bold">MIS À JOUR : <span class="text-dark">AUJOURD'HUI</span></div>
+</div>
 
+<!-- Cartes Métriques Premium -->
 <div class="row g-4 mb-5">
-    <!-- Utilisateurs -->
     <div class="col-md-3">
-        <div class="card h-100 metric-card shadow-sm">
-            <div class="card-body">
-                <div class="metric-icon bg-primary bg-opacity-10 text-primary">
-                    <i class="fas fa-users fa-lg"></i>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">UTILISATEURS</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('totalUsers', 0) }}</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-users"></i>
+                    </div>
                 </div>
-                <h6 class="text-muted fw-bold">Utilisateurs</h6>
-                <h2 class="fw-bold mb-2">{{ metrics.totalUsers or 0 }}</h2>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-success-subtle text-success">{{ metrics.activeUsers or 0 }} actifs</span>
-                    <span class="badge bg-danger-subtle text-danger">{{ metrics.suspendedUsers or 0 }} susp.</span>
+                <div class="mt-3 small">
+                    <span class="text-success fw-bold">{{ metrics.get('activeUsers', 0) }}</span> actifs
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modération -->
     <div class="col-md-3">
-        <div class="card h-100 metric-card shadow-sm">
-            <div class="card-body">
-                <div class="metric-icon bg-warning bg-opacity-10 text-warning">
-                    <i class="fas fa-gavel fa-lg"></i>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">MODÉRATION</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('pendingModeration', 0) }}</h3>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-gavel"></i>
+                    </div>
                 </div>
-                <h6 class="text-muted fw-bold">En attente</h6>
-                <h2 class="fw-bold mb-2">{{ metrics.pendingModeration or 0 }}</h2>
-                <small class="text-muted">Prod: {{ metrics.pendingProducts or 0 }} | Serv: {{ metrics.pendingServices or 0 }}</small>
+                <div class="mt-3 small text-muted">
+                    Flux en attente de révision
+                </div>
             </div>
         </div>
     </div>
-    <!-- Commandes -->
     <div class="col-md-3">
-        <div class="card h-100 metric-card shadow-sm">
-            <div class="card-body">
-                <div class="metric-icon bg-success bg-opacity-10 text-success">
-                    <i class="fas fa-shopping-cart fa-lg"></i>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">VOLUME ($)</div>
+                        <h3 class="fw-bold mb-0 text-dark">${{ metrics.get('finance', {}).get('orderVolume', 0) }}</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
                 </div>
-                <h6 class="text-muted fw-bold">Commandes</h6>
-                <h2 class="fw-bold mb-2">{{ metrics.totalOrders or 0 }}</h2>
-                <span class="badge badge-gold">Vol: ${{ metrics.finance.orderVolume or 0 }}</span>
+                <div class="mt-3">
+                    <span class="badge badge-gold">PREMIUM PARTNER</span>
+                </div>
             </div>
         </div>
     </div>
-    <!-- Litiges -->
     <div class="col-md-3">
-        <div class="card h-100 metric-card shadow-sm">
-            <div class="card-body">
-                <div class="metric-icon bg-danger bg-opacity-10 text-danger">
-                    <i class="fas fa-exclamation-triangle fa-lg"></i>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">LITIGES</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('openDisputes', 0) }}</h3>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
                 </div>
-                <h6 class="text-muted fw-bold">Litiges Ouverts</h6>
-                <h2 class="fw-bold mb-2">{{ metrics.openDisputes or 0 }}</h2>
-                <small class="text-muted">Actions requises immédiates</small>
+                <div class="mt-3 small text-danger fw-bold">
+                    Actions requises
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mb-5">
-    <!-- Graphique Volume Financier -->
+<div class="row g-4 mb-5">
+    <!-- Graphique Finance -->
     <div class="col-lg-8">
-        <div class="card shadow-sm h-100">
-            <div class="card-header">
-                <h5 class="mb-0">Aperçu Financier</h5>
-            </div>
-            <div class="card-body">
-                <div style="position: relative; height: 300px; width: 100%;">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">PERFORMANCE FINANCIÈRE</div>
+            <div class="card-body p-4">
+                <div style="position: relative; height: 350px; width: 100%;">
                     <canvas id="financeChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Répartition Utilisateurs -->
+    <!-- Répartition -->
     <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header">
-                <h5 class="mb-0">Répartition Membres</h5>
-            </div>
-            <div class="card-body d-flex align-items-center justify-content-center">
-                <div style="position: relative; height: 300px; width: 100%;">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">MIX UTILISATEURS</div>
+            <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                <div style="position: relative; height: 350px; width: 100%;">
                     <canvas id="usersChart"></canvas>
                 </div>
             </div>
@@ -97,53 +114,33 @@
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: { legend: { labels: { font: { family: 'Inter', size: 12, weight: '600' } } } }
         };
 
         const financeCtx = document.getElementById('financeChart').getContext('2d');
         new Chart(financeCtx, {
             type: 'line',
             data: {
-                labels: ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'Actuel'],
+                labels: ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'ACTUEL'],
                 datasets: [{
                     label: 'Commandes ($)',
-                    data: [0, 0, 0, 0, 0, {{ metrics.finance.orderVolume or 0 }}],
+                    data: [0, 0, 0, 0, 0, {{ metrics.get('finance', {}).get('orderVolume', 0) }}],
                     borderColor: '#bf953f',
-                    backgroundColor: 'rgba(191, 149, 63, 0.1)',
+                    backgroundColor: 'rgba(191, 149, 63, 0.05)',
                     fill: true,
-                    tension: 0.3,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#bf953f'
-                }, {
-                    label: 'Factures ($)',
-                    data: [0, 0, 0, 0, 0, {{ metrics.finance.invoiceVolume or 0 }}],
-                    borderColor: '#12161f',
-                    backgroundColor: 'rgba(18, 22, 31, 0.05)',
-                    fill: true,
-                    tension: 0.3,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#12161f'
+                    tension: 0.4,
+                    borderWidth: 4,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#bf953f',
+                    pointBorderWidth: 3
                 }]
             },
             options: {
                 ...commonOptions,
-                plugins: {
-                    legend: { 
-                        position: 'top',
-                        labels: { usePointStyle: true, padding: 20 }
-                    },
-                    tooltip: { mode: 'index', intersect: false }
-                },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
-                        ticks: { callback: value => '$' + value }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { font: { family: 'Inter' } } },
+                    x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } }
                 }
             }
         });
@@ -152,19 +149,19 @@
         new Chart(usersCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Actifs', 'Suspendus'],
+                labels: ['ACTIFS', 'SUSPENDUS'],
                 datasets: [{
-                    data: [{{ metrics.activeUsers or 0 }}, {{ metrics.suspendedUsers or 0 }}],
-                    backgroundColor: ['#28a745', '#dc3545'],
+                    data: [{{ metrics.get('activeUsers', 0) }}, {{ metrics.get('suspendedUsers', 0) }}],
+                    backgroundColor: ['#0ca678', '#fa5252'],
                     borderWidth: 0,
-                    hoverOffset: 10
+                    hoverOffset: 20
                 }]
             },
             options: {
                 ...commonOptions,
-                cutout: '75%',
+                cutout: '80%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20 } }
+                    legend: { position: 'bottom', labels: { padding: 30 } }
                 }
             }
         });

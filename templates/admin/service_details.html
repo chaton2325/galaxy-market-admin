@@ -1,89 +1,108 @@
 {% extends "base.html" %}
 
-{% block title %}Détails Service{% endblock %}
+{% block title %}Expertise Service{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <a href="{{ url_for('services.list_services') }}" class="btn btn-sm btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Retour à la liste
+    <a href="{{ url_for('services.list_services') }}" class="text-decoration-none text-muted fw-bold small">
+        <i class="fas fa-arrow-left me-1"></i> CATALOGUE SERVICES
     </a>
 </div>
 
 {% if service %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h4 class="mb-0">{{ service.name or 'Sans nom' }}</h4>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 mb-4">
+            <div class="card-header">
+                DÉTAILS DU SERVICE
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ service.id or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Propriétaire (ID)</div>
-                    <div class="col-sm-8">{{ service.ownerId or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Description</div>
-                    <div class="col-sm-8">{{ service.description or 'Aucune description' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Prix</div>
-                    <div class="col-sm-8">${{ service.price | default(0) }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Status Modération</div>
-                    <div class="col-sm-8">
-                        {% set status = service.moderationStatus | default('pending') %}
-                        {% if status == 'approved' %}
-                        <span class="badge bg-success">Approuvé</span>
-                        {% elif status == 'rejected' %}
-                        <span class="badge bg-danger">Rejeté</span>
-                        {% else %}
-                        <span class="badge bg-warning">En attente</span>
-                        {% endif %}
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="info-label">Nom de l'offre</div>
+                        <h4 class="fw-bold text-dark">{{ service.get('name', 'N/A') }}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">ID Système</div>
+                        <div class="info-value"><code class="small">{{ service.get('id', 'N/A') }}</code></div>
+                        
+                        <div class="info-label">Propriétaire</div>
+                        <div class="info-value"><span class="badge bg-light text-dark border">{{ service.get('ownerId', 'N/A') }}</span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Prix de base</div>
+                        <div class="info-value text-primary fw-bold">${{ service.get('price', 0) }} USD</div>
+                        
+                        <div class="info-label">Statut Modération</div>
+                        <div class="info-value">
+                            {% set status = service.get('moderationStatus', 'pending') %}
+                            {% if status == 'approved' %}
+                            <span class="badge badge-soft-success">APPROUVÉ</span>
+                            {% elif status == 'rejected' %}
+                            <span class="badge badge-soft-danger">REJETÉ</span>
+                            {% else %}
+                            <span class="badge badge-soft-warning">PENDING</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        <div class="info-label">Description du service</div>
+                        <div class="p-3 bg-light rounded text-muted" style="min-height: 100px;">
+                            {{ service.get('description', 'Aucune description fournie.') }}
+                        </div>
                     </div>
                 </div>
-                {% if service.moderationReason %}
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Raison Modération</div>
-                    <div class="col-sm-8 text-danger">{{ service.moderationReason }}</div>
-                </div>
-                {% endif %}
             </div>
         </div>
+
+        {% if service.get('moderationReason') %}
+        <div class="card border-0 border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="info-label text-warning">Note de modération précédente</div>
+                <p class="mb-0 small">{{ service.get('moderationReason') }}</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm border-primary">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Modération</h5>
-            </div>
-            <div class="card-body">
-                <form action="{{ url_for('services.moderate_service', service_id=service.id) }}" method="POST">
+    <div class="col-lg-4">
+        <!-- Panel Modération -->
+        <div class="card border-0 mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">MODÉRATION</div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('services.moderate_service', service_id=service.get('id')) }}" method="POST">
                     <div class="mb-3">
-                        <label class="form-label">Action</label>
-                        <select name="status" class="form-select" required>
-                            <option value="">Choisir...</option>
-                            <option value="approved">Approuver</option>
-                            <option value="rejected">Rejeter</option>
+                        <label class="form-label small">Décision</label>
+                        <select name="status" class="form-select border-light bg-light" required>
+                            <option value="">Sélectionner...</option>
+                            <option value="approved">✅ Approuver le service</option>
+                            <option value="rejected">❌ Rejeter (contenu non conforme)</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Raison (si rejeté)</label>
-                        <textarea name="reason" class="form-control" rows="2"></textarea>
+                        <label class="form-label small">Motif / Commentaire</label>
+                        <textarea name="reason" class="form-control border-light bg-light" rows="3" placeholder="Raison de la décision..."></textarea>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Valider la modération</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">APPLIQUER LA DÉCISION</button>
                 </form>
             </div>
+        </div>
+
+        <!-- Zone Danger -->
+        <div class="danger-zone shadow-sm">
+            <h6 class="text-danger fw-bold mb-3 small">ACTIONS D'URGENCE</h6>
+            <form action="{{ url_for('services.archive_service', service_id=service.get('id')) }}" method="POST" class="mb-2">
+                <input type="hidden" name="ownerId" value="{{ service.get('ownerId') }}">
+                <button type="submit" class="btn btn-outline-warning w-100 btn-sm fw-bold">ARCHIVER</button>
+            </form>
+            <form action="{{ url_for('services.delete_service', service_id=service.get('id')) }}" method="POST">
+                <input type="hidden" name="ownerId" value="{{ service.get('ownerId') }}">
+                <button type="submit" class="btn btn-danger w-100 btn-sm fw-bold" onclick="return confirm('Supprimer définitivement ?')">SUPPRIMER</button>
+            </form>
         </div>
     </div>
 </div>
 {% else %}
-<div class="alert alert-warning">Service non trouvé.</div>
+<div class="alert alert-light border">Service non répertorié.</div>
 {% endif %}
 {% endblock %}

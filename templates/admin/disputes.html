@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Litiges{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Gestion des Litiges</h2>
+    <button class="btn btn-dark btn-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#createDisputeModal">
+        <i class="fas fa-plus me-1"></i> OUVRIR UN DOSSIER
+    </button>
+</div>
+
+<div class="card border-0 mb-4 shadow-sm">
+    <div class="card-body p-4">
+        <form method="GET" class="row g-3">
+            <div class="col-md-9">
+                <select name="status" class="form-select bg-light border-0">
+                    <option value="">Tous les dossiers de litige</option>
+                    <option value="OPEN" {{ 'selected' if current_status == 'OPEN' }}>🔴 DOSSIERS OUVERTS (OPEN)</option>
+                    <option value="CLOSED" {{ 'selected' if current_status == 'CLOSED' }}>🟢 DOSSIERS CLÔTURÉS (CLOSED)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-gold w-100">FILTRER</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">RÉFÉRENCE</th>
+                        <th>TYPE / CIBLE</th>
+                        <th>RAISON DU LITIGE</th>
+                        <th>STATUT</th>
+                        <th class="text-end pe-4">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dispute in disputes %}
+                    <tr>
+                        <td class="ps-4">
+                            <code class="small text-muted">{{ dispute.get('id', 'N/A')[:12] }}</code>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border small">{{ dispute.get('targetType') }}</span>
+                            <div class="small text-muted mt-1">ID: {{ dispute.get('targetId')[:8] }}...</div>
+                        </td>
+                        <td class="small fw-medium">{{ dispute.get('reason') }}</td>
+                        <td>
+                            {% if dispute.get('status') == 'OPEN' %}
+                            <span class="badge badge-soft-danger">OPEN</span>
+                            {% else %}
+                            <span class="badge badge-soft-success">CLOSED</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if dispute.get('status') == 'OPEN' %}
+                            <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#closeModal{{ dispute.get('id') }}">
+                                CLÔTURER
+                            </button>
+                            {% else %}
+                            <span class="text-muted small">Résolu</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    {% if dispute.get('status') == 'OPEN' %}
+                    <!-- Modal Clôture spécifique -->
+                    <div class="modal fade" id="closeModal{{ dispute.get('id') }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content border-0">
+                                <form action="{{ url_for('disputes.close', dispute_id=dispute.get('id')) }}" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Clôturer le dossier</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <label class="form-label small fw-bold">NOTE DE RÉSOLUTION FINALE</label>
+                                        <textarea name="resolutionNote" class="form-control bg-light border-0" rows="4" required placeholder="Expliquez la résolution..."></textarea>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">ANNULER</button>
+                                        <button type="submit" class="btn btn-danger px-4 fw-bold">CONFIRMER LA CLÔTURE</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">Aucun litige répertorié.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Création -->
+<div class="modal fade" id="createDisputeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <form action="{{ url_for('disputes.create') }}" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">OUVRIR UN LITIGE</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">TYPE DE RESSOURCE</label>
+                        <select name="targetType" class="form-select bg-light border-0" required>
+                            <option value="ORDER">COMMANDE (ORDER)</option>
+                            <option value="INVOICE">FACTURE (INVOICE)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">ID DE LA RESSOURCE (UUID)</label>
+                        <input type="text" name="targetId" class="form-control bg-light border-0" placeholder="Copier-coller l'ID ici" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold">MOTIF DU LITIGE</label>
+                        <textarea name="reason" class="form-control bg-light border-0" rows="3" required placeholder="Pourquoi ouvrez-vous ce litige ?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">ANNULER</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">OUVRIR LE DOSSIER</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

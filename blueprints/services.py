@@ -25,11 +25,9 @@ def list_services():
         elif isinstance(data, dict):
             services = data.get('services') or data.get('data') or data.get('items') or []
             
-        # Normalization for MongoDB _id
         for s in services:
-            if isinstance(s, dict):
-                if 'id' not in s and '_id' in s:
-                    s['id'] = s['_id']
+            if isinstance(s, dict) and 'id' not in s and '_id' in s:
+                s['id'] = s['_id']
             
     return render_template('admin/services_list.html', services=services)
 
@@ -59,3 +57,24 @@ def moderate_service(service_id):
     else:
         flash('Erreur lors de la modération.', 'danger')
     return redirect(url_for('services.service_details', service_id=service_id))
+
+@services_bp.route('/<service_id>/archive', methods=['POST'])
+def archive_service(service_id):
+    owner_id = request.form.get('ownerId')
+    response = APIClient.patch(f'/services/{service_id}/archive', params={'ownerId': owner_id})
+    if response and response.status_code == 200:
+        flash('Service archivé.', 'success')
+    else:
+        flash('Erreur lors de l\'archivage.', 'danger')
+    return redirect(url_for('services.service_details', service_id=service_id))
+
+@services_bp.route('/<service_id>/delete', methods=['POST'])
+def delete_service(service_id):
+    owner_id = request.form.get('ownerId')
+    response = APIClient.delete(f'/services/{service_id}', params={'ownerId': owner_id})
+    if response and response.status_code == 200:
+        flash('Service supprimé.', 'success')
+        return redirect(url_for('services.list_services'))
+    else:
+        flash('Erreur lors de la suppression.', 'danger')
+        return redirect(url_for('services.service_details', service_id=service_id))

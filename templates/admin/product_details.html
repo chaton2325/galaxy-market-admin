@@ -1,93 +1,104 @@
 {% extends "base.html" %}
 
-{% block title %}Détails Produit{% endblock %}
+{% block title %}Expertise Produit{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <a href="{{ url_for('products.list_products') }}" class="btn btn-sm btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Retour à la liste
+    <a href="{{ url_for('products.list_products') }}" class="text-decoration-none text-muted fw-bold small">
+        <i class="fas fa-arrow-left me-1"></i> CATALOGUE PRODUITS
     </a>
 </div>
 
 {% if product %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h4 class="mb-0">{{ product.name or 'Sans nom' }}</h4>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">ID</div>
-                    <div class="col-sm-8 text-muted">{{ product.id or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Propriétaire (ID)</div>
-                    <div class="col-sm-8">{{ product.ownerId or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Description</div>
-                    <div class="col-sm-8">{{ product.description or 'Aucune description' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Prix</div>
-                    <div class="col-sm-8">${{ product.price | default(0) }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Quantité</div>
-                    <div class="col-sm-8">{{ product.quantity | default('Non spécifiée') }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Status Modération</div>
-                    <div class="col-sm-8">
-                        {% set status = product.moderationStatus | default('pending') %}
-                        {% if status == 'approved' %}
-                        <span class="badge bg-success">Approuvé</span>
-                        {% elif status == 'rejected' %}
-                        <span class="badge bg-danger">Rejeté</span>
-                        {% else %}
-                        <span class="badge bg-warning">En attente</span>
-                        {% endif %}
+<div class="row g-4">
+    <!-- Infos Produit -->
+    <div class="col-lg-8">
+        <div class="card border-0 mb-4">
+            <div class="card-header">DÉTAILS DE L'INVENTAIRE</div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="info-label">Désignation</div>
+                        <h4 class="fw-bold text-dark">{{ product.get('name', 'N/A') }}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Stock disponible</div>
+                        <div class="info-value">
+                            {% set qty = product.get('quantity', 0) %}
+                            {% if qty > 0 %}
+                            <span class="text-success fw-bold">{{ qty }} unités</span>
+                            {% else %}
+                            <span class="text-danger fw-bold">EN RUPTURE</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-label">Propriétaire</div>
+                        <div class="info-value"><span class="badge bg-light text-dark border">{{ product.get('ownerId', 'N/A') }}</span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-label">Prix unitaire</div>
+                        <div class="info-value text-primary fw-bold">${{ product.get('price', 0) }} USD</div>
+                        
+                        <div class="info-label">Statut Modération</div>
+                        <div class="info-value">
+                            {% set status = product.get('moderationStatus', 'pending') %}
+                            {% if status == 'approved' %}
+                            <span class="badge badge-soft-success">APPROUVÉ</span>
+                            {% elif status == 'rejected' %}
+                            <span class="badge badge-soft-danger">REJETÉ</span>
+                            {% else %}
+                            <span class="badge badge-soft-warning">PENDING</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        <div class="info-label">Description commerciale</div>
+                        <div class="p-3 bg-light rounded text-muted" style="min-height: 100px;">
+                            {{ product.get('description', 'Aucune description fournie.') }}
+                        </div>
                     </div>
                 </div>
-                {% if product.moderationReason %}
-                <div class="row mb-3">
-                    <div class="col-sm-4 fw-bold">Raison Modération</div>
-                    <div class="col-sm-8 text-danger">{{ product.moderationReason }}</div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm border-primary">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Modération</h5>
-            </div>
-            <div class="card-body">
-                <form action="{{ url_for('products.moderate_product', product_id=product.id) }}" method="POST">
+    <!-- Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">MODÉRATION</div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('products.moderate_product', product_id=product.get('id')) }}" method="POST">
                     <div class="mb-3">
-                        <label class="form-label">Action</label>
-                        <select name="status" class="form-select" required>
-                            <option value="">Choisir...</option>
-                            <option value="approved">Approuver</option>
-                            <option value="rejected">Rejeter</option>
+                        <label class="form-label small">Décision</label>
+                        <select name="status" class="form-select border-light bg-light" required>
+                            <option value="">Sélectionner...</option>
+                            <option value="approved">✅ Approuver la mise en vente</option>
+                            <option value="rejected">❌ Rejeter (contenu non conforme)</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Raison (si rejeté)</label>
-                        <textarea name="reason" class="form-control" rows="2"></textarea>
+                        <label class="form-label small">Motif / Commentaire</label>
+                        <textarea name="reason" class="form-control border-light bg-light" rows="3" placeholder="Raison de la décision..."></textarea>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Valider la modération</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">APPLIQUER LA DÉCISION</button>
                 </form>
             </div>
+        </div>
+
+        <div class="danger-zone shadow-sm">
+            <h6 class="text-danger fw-bold mb-3 small">ZONE DE DANGER</h6>
+            <form action="{{ url_for('products.archive_product', product_id=product.get('id')) }}" method="POST" class="mb-2">
+                <input type="hidden" name="ownerId" value="{{ product.get('ownerId') }}">
+                <button type="submit" class="btn btn-outline-warning w-100 btn-sm fw-bold">ARCHIVER LE PRODUIT</button>
+            </form>
+            <form action="{{ url_for('products.delete_product', product_id=product.get('id')) }}" method="POST">
+                <input type="hidden" name="ownerId" value="{{ product.get('ownerId') }}">
+                <button type="submit" class="btn btn-danger w-100 btn-sm fw-bold" onclick="return confirm('Confirmer la suppression ?')">SUPPRIMER DÉFINITIVEMENT</button>
+            </form>
         </div>
     </div>
 </div>
 {% else %}
-<div class="alert alert-warning">Produit non trouvé.</div>
+<div class="alert alert-light border">Produit non répertorié dans le catalogue.</div>
 {% endif %}
 {% endblock %}

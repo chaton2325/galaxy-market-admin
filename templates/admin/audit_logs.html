@@ -3,38 +3,74 @@
 {% block title %}Logs d'Audit{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Journaux d'Audit</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Journaux d'Audit</h2>
+    <div class="text-muted small fw-bold"><i class="fas fa-shield-alt me-1"></i> SURVEILLANCE SYSTÈME</div>
+</div>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0">Historique des actions administratives</h5>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 small fw-bold">HISTORIQUE DES ACTIONS ADMIN</h5>
+        <div class="dropdown">
+            <button class="btn btn-sm btn-light border dropdown-toggle" data-bs-toggle="dropdown">Exporter</button>
+            <ul class="dropdown-menu shadow-sm border-0">
+                <li><a class="dropdown-item small" href="#"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
+                <li><a class="dropdown-item small" href="#"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
+            </ul>
+        </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <th>Admin ID</th>
-                        <th>Action</th>
-                        <th>Ressource</th>
-                        <th>ID Ressource</th>
-                        <th>IP Address</th>
-                        <th>Date</th>
+                        <th class="ps-4">ADMINISTRATEUR</th>
+                        <th>ACTION</th>
+                        <th>RESSOURCE CIBLÉE</th>
+                        <th>RÉSEAU / IP</th>
+                        <th class="pe-4">HORODATAGE</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for log in logs %}
                     <tr>
-                        <td><code class="small text-muted">{{ log.adminId[:12] }}...</code></td>
-                        <td><span class="badge bg-light text-dark border">{{ log.action }}</span></td>
-                        <td><span class="badge bg-info bg-opacity-10 text-info">{{ log.resourceType }}</span></td>
-                        <td><code class="small">{{ log.resourceId[:8] }}...</code></td>
-                        <td class="small">{{ log.ipAddress or 'N/A' }}</td>
-                        <td class="small text-muted">{{ log.createdAt }}</td>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-dark text-white rounded-circle me-3 d-flex align-items-center justify-content-center small" style="width: 32px; height: 32px; font-size: 10px;">
+                                    AD
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">{{ log.adminId[:12] }}...</div>
+                                    <div class="text-muted" style="font-size: 10px;">ID Administrateur</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark bg-opacity-10 text-dark fw-bold border-0 px-2 py-1">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info bg-opacity-10 text-info me-2" style="font-size: 9px;">{{ log.resourceType }}</span>
+                                <code class="small text-muted">{{ log.resourceId[:8] }}...</code>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small text-muted"><i class="fas fa-network-wired me-1"></i> {{ log.ipAddress or '127.0.0.1' }}</div>
+                        </td>
+                        <td class="pe-4">
+                            <div class="small fw-bold text-dark">{{ log.createdAt }}</div>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">Aucun journal d'audit disponible</td>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <div class="opacity-50">
+                                <i class="fas fa-stream fa-3x mb-3"></i>
+                                <p class="mb-0">Aucun événement dans la base de données.</p>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
