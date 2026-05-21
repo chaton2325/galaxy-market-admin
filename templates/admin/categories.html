@@ -3,29 +3,39 @@
 {% block title %}Catégories{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Management des Catégories</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Management des Catégories</h2>
+</div>
 
 <div class="row g-4">
-    <!-- Formulaire -->
+    <!-- Formulaire de Création -->
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white rounded-top">
-                NOUVELLE CATÉGORIE
+            <div class="card-header bg-dark text-white rounded-top text-uppercase fw-bold small">
+                Nouvelle Catégorie
             </div>
             <div class="card-body p-4">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">NOM DE LA CATÉGORIE</label>
+                        <label class="form-label small fw-bold text-uppercase">Nom de la catégorie</label>
                         <input type="text" name="name" class="form-control bg-light border-0" required placeholder="ex: Électronique, Design...">
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold">DOMAINE D'APPLICATION</label>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Domaine d'application</label>
                         <select name="scope" class="form-select bg-light border-0" required>
                             <option value="PRODUCT">📦 PRODUITS</option>
                             <option value="SERVICE">🛠️ SERVICES</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-gold w-100 fw-bold">CRÉER LA CATÉGORIE</button>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase">Image (Optionnel)</label>
+                        <input type="file" name="file" class="form-control bg-light border-0" accept="image/*" onchange="previewImage(this, 'create-preview')">
+                        <div class="form-text small">JPEG, PNG ou WEBP.</div>
+                        <div id="create-preview" class="mt-2 d-none">
+                            <img src="" alt="Preview" class="rounded shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 fw-bold text-uppercase">Créer la catégorie</button>
                 </form>
             </div>
         </div>
@@ -38,32 +48,142 @@
         </div>
     </div>
 
-    <!-- Liste (Placeholder stylisé) -->
+    <!-- Liste des Catégories -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
-                CATÉGORIES ACTIVES
+            <div class="card-header bg-white border-bottom-0 pb-0">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-uppercase small">Catégories Actives</span>
+                    <span class="badge bg-soft-primary text-primary">{{ categories|length }} au total</span>
+                </div>
+                
+                <div class="row g-2 mb-3">
+                    <div class="col-md-7">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" id="categorySearch" class="form-control bg-light border-0" placeholder="Rechercher une catégorie...">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="btn-group btn-group-sm w-100" role="group">
+                            <input type="radio" class="btn-check" name="scopeFilter" id="filterAll" value="ALL" checked>
+                            <label class="btn btn-outline-secondary border-0 bg-light" for="filterAll">TOUT</label>
+                            
+                            <input type="radio" class="btn-check" name="scopeFilter" id="filterProduct" value="PRODUCT">
+                            <label class="btn btn-outline-secondary border-0 bg-light" for="filterProduct">PRODUITS</label>
+                            
+                            <input type="radio" class="btn-check" name="scopeFilter" id="filterService" value="SERVICE">
+                            <label class="btn btn-outline-secondary border-0 bg-light" for="filterService">SERVICES</label>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
+                                <th style="width: 80px;">IMAGE</th>
                                 <th>NOM</th>
                                 <th>SCOPE</th>
                                 <th class="text-end">ACTIONS</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="3" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="fas fa-database fa-2x mb-3 opacity-25"></i>
-                                        <p class="mb-0">En attente de synchronisation avec l'API...</p>
-                                        <small>Consultez les <strong>Audit Logs</strong> pour voir les créations récentes.</small>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="categoriesTableBody">
+                            {% if categories %}
+                                {% for cat in categories %}
+                                <tr class="category-row" data-name="{{ cat.name|lower }}" data-scope="{{ cat.scope }}">
+                                    <td>
+                                        {% if cat.imageUrl %}
+                                            <img src="{{ cat.imageUrl }}" alt="{{ cat.name }}" class="rounded shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-image text-muted opacity-50"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ cat.name }}</div>
+                                        <div class="text-muted small">/{{ cat.slug }}</div>
+                                    </td>
+                                    <td>
+                                        {% if cat.scope == 'PRODUCT' %}
+                                            <span class="badge bg-soft-info text-info text-uppercase"><i class="fas fa-box me-1"></i> Produit</span>
+                                        {% else %}
+                                            <span class="badge bg-soft-warning text-warning text-uppercase"><i class="fas fa-tools me-1"></i> Service</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary me-2" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal{{ cat.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form action="{{ url_for('categories.delete', cat_id=cat.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Modal d'édition -->
+                                        <div class="modal fade" id="editModal{{ cat.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered text-start">
+                                                <div class="modal-content border-0 shadow-lg">
+                                                    <div class="modal-header bg-dark text-white">
+                                                        <h5 class="modal-title text-uppercase fw-bold small">Modifier {{ cat.name }}</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{ url_for('categories.update', cat_id=cat.id) }}" method="POST" enctype="multipart/form-data">
+                                                        <div class="modal-body p-4">
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold text-uppercase">Nom de la catégorie</label>
+                                                                <input type="text" name="name" class="form-control bg-light border-0" value="{{ cat.name }}" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-bold text-uppercase">Domaine d'application</label>
+                                                                <select name="scope" class="form-select bg-light border-0" required>
+                                                                    <option value="PRODUCT" {% if cat.scope == 'PRODUCT' %}selected{% endif %}>📦 PRODUITS</option>
+                                                                    <option value="SERVICE" {% if cat.scope == 'SERVICE' %}selected{% endif %}>🛠️ SERVICES</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-0">
+                                                                <label class="form-label small fw-bold text-uppercase">Nouvelle image (Optionnel)</label>
+                                                                <input type="file" name="file" class="form-control bg-light border-0" accept="image/*" onchange="previewImage(this, 'edit-preview-{{ cat.id }}')">
+                                                                <div class="form-text small">Laisse vide pour conserver l'image actuelle.</div>
+                                                                <div id="edit-preview-{{ cat.id }}" class="mt-2 d-none">
+                                                                    <img src="" alt="Preview" class="rounded shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light border-0">
+                                                            <button type="button" class="btn btn-secondary px-4 text-uppercase fw-bold small" data-bs-dismiss="modal">Annuler</button>
+                                                            <button type="submit" class="btn btn-gold fw-bold px-4 text-uppercase">Enregistrer</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                <tr id="noResultsRow" class="d-none">
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-search fa-2x mb-3 opacity-25"></i>
+                                            <p class="mb-0">Aucun résultat ne correspond à votre recherche.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-database fa-2x mb-3 opacity-25"></i>
+                                            <p class="mb-0">Aucune catégorie trouvée.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
@@ -71,4 +191,70 @@
         </div>
     </div>
 </div>
+
+<script>
+function previewImage(input, previewId) {
+    const previewContainer = document.getElementById(previewId);
+    const previewImg = previewContainer.querySelector('img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            previewContainer.classList.remove('d-none');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewImg.src = "";
+        previewContainer.classList.add('d-none');
+    }
+}
+
+// Filtrage en temps réel
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('categorySearch');
+    const scopeFilters = document.querySelectorAll('input[name="scopeFilter"]');
+    const rows = document.querySelectorAll('.category-row');
+    const noResultsRow = document.getElementById('noResultsRow');
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedScope = document.querySelector('input[name="scopeFilter"]:checked').value;
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.dataset.name;
+            const scope = row.dataset.scope;
+            
+            const matchesSearch = name.includes(searchTerm);
+            const matchesScope = selectedScope === 'ALL' || scope === selectedScope;
+
+            if (matchesSearch && matchesScope) {
+                row.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                row.classList.add('d-none');
+            }
+        });
+
+        if (noResultsRow) {
+            if (visibleCount === 0 && rows.length > 0) {
+                noResultsRow.classList.remove('d-none');
+            } else {
+                noResultsRow.classList.add('d-none');
+            }
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterTable);
+    }
+    
+    scopeFilters.forEach(radio => {
+        radio.addEventListener('change', filterTable);
+    });
+});
+</script>
 {% endblock %}

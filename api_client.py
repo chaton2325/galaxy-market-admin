@@ -2,7 +2,7 @@ import requests
 from flask import session, redirect, url_for, flash
 
 class APIClient:
-    BASE_URL = "https://galaxy.mirhosty.com/api/admin"
+    BASE_URL = "http://localhost:3000/api/admin"
 
     @staticmethod
     def get_headers():
@@ -22,10 +22,11 @@ class APIClient:
             headers.update(kwargs.pop('headers'))
         
         try:
+            # If files are present, requests will automatically set the correct Content-Type for multipart/form-data
+            # We don't want to set Content-Type manually if there's a file.
             response = requests.request(method, url, headers=headers, **kwargs)
             if response.status_code == 401:
                 # Handle unauthorized access (e.g., redirect to login)
-                # Note: This is a utility class, actual redirect should happen in the view
                 pass
             return response
         except requests.exceptions.RequestException as e:
@@ -37,12 +38,12 @@ class APIClient:
         return cls.request('GET', endpoint, params=params)
 
     @classmethod
-    def post(cls, endpoint, json=None):
-        return cls.request('POST', endpoint, json=json)
+    def post(cls, endpoint, json=None, data=None, files=None):
+        return cls.request('POST', endpoint, json=json, data=data, files=files)
 
     @classmethod
-    def patch(cls, endpoint, json=None, params=None):
-        return cls.request('PATCH', endpoint, json=json, params=params)
+    def patch(cls, endpoint, json=None, data=None, files=None, params=None):
+        return cls.request('PATCH', endpoint, json=json, data=data, files=files, params=params)
 
     @classmethod
     def delete(cls, endpoint, params=None):

@@ -13,23 +13,42 @@ def index():
     if request.method == 'POST':
         name = request.form.get('name')
         scope = request.form.get('scope')
-        response = APIClient.post('/categories', json={'name': name, 'scope': scope})
+        file = request.files.get('file')
+        
+        if file and file.filename:
+            files = {'file': (file.filename, file.stream, file.content_type)}
+            data = {'name': name, 'scope': scope}
+            response = APIClient.post('/categories', data=data, files=files)
+        else:
+            response = APIClient.post('/categories', json={'name': name, 'scope': scope})
+            
         if response and response.status_code in [200, 201]:
             flash('Catégorie créée.', 'success')
         else:
             flash('Erreur lors de la création.', 'danger')
         return redirect(url_for('categories.index'))
 
-    # For now, there's no GET /categories in the documentation, 
-    # but usually there is one or it's part of another service.
-    # If not available, we just show the creation form.
-    return render_template('admin/categories.html')
+    # Fetch categories
+    response = APIClient.get('/categories')
+    categories = []
+    if response and response.status_code == 200:
+        categories = response.json()
+    
+    return render_template('admin/categories.html', categories=categories)
 
 @categories_bp.route('/<cat_id>', methods=['POST'])
 def update(cat_id):
     name = request.form.get('name')
     scope = request.form.get('scope')
-    response = APIClient.patch(f'/categories/{cat_id}', json={'name': name, 'scope': scope})
+    file = request.files.get('file')
+    
+    if file and file.filename:
+        files = {'file': (file.filename, file.stream, file.content_type)}
+        data = {'name': name, 'scope': scope}
+        response = APIClient.patch(f'/categories/{cat_id}', data=data, files=files)
+    else:
+        response = APIClient.patch(f'/categories/{cat_id}', json={'name': name, 'scope': scope})
+        
     if response and response.status_code == 200:
         flash('Catégorie mise à jour.', 'success')
     else:
