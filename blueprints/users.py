@@ -11,7 +11,7 @@ def check_auth():
 @users_bp.route('/')
 def list_users():
     page = request.args.get('page', 1)
-    response = APIClient.get(f'/users?page={page}')
+    response = APIClient.get('/users', params={'page': page})
     users = []
     if response and response.status_code == 200:
         data = response.json()

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Finance{% endblock %}
+
+{% macro dollars_from_cents(cents) -%}
+${{ '%.2f'|format((cents or 0) / 100) }}
+{%- endmacro %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Grand Livre Finance</h2>
+    <a class="btn btn-gold btn-sm" href="{{ url_for('finance.export') }}{% if export_query %}?{{ export_query }}{% endif %}">
+        <i class="fas fa-file-csv me-1"></i> EXPORT CSV
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label mb-1">TOTAL RECU</div>
+                <h3 class="fw-bold text-dark mb-0">{% if stats.get('totalReceived') is not none %}${{ '%.2f'|format(stats.get('totalReceived')) }}{% else %}{{ dollars_from_cents(stats.get('totalReceivedCents')) }}{% endif %}</h3>
+                <div class="small text-muted mt-2">{{ stats.get('totalReceivedCents', 0) }} cents</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label mb-1">PAYOUTS</div>
+                <h3 class="fw-bold text-dark mb-0">{% if stats.get('totalPaidOut') is not none %}${{ '%.2f'|format(stats.get('totalPaidOut')) }}{% else %}{{ dollars_from_cents(stats.get('totalPaidOutCents')) }}{% endif %}</h3>
+                <div class="small text-muted mt-2">{{ stats.get('totalPaidOutCents', 0) }} cents</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label mb-1">COMMISSIONS</div>
+                <h3 class="fw-bold text-success mb-0">{% if stats.get('totalCommissions') is not none %}${{ '%.2f'|format(stats.get('totalCommissions')) }}{% else %}{{ dollars_from_cents(stats.get('totalCommissionsCents')) }}{% endif %}</h3>
+                <div class="small text-muted mt-2">{{ stats.get('totalCommissionsCents', 0) }} cents</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label mb-1">ECRITURES</div>
+                <h3 class="fw-bold text-dark mb-0">{{ stats.get('totalEntries', 0) }}</h3>
+                <div class="small text-muted mt-2">{{ dollars_from_cents(stats.get('pendingPayoutCents')) }} en attente</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white">FILTRES DU JOURNAL</div>
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('finance.index') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">TYPE</label>
+                        <select name="entryType" class="form-select bg-light border-0">
+                            <option value="">Tous</option>
+                            {% for type in entry_types %}
+                            <option value="{{ type }}" {% if filters.get('entryType') == type %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">RESSOURCE</label>
+                        <select name="resourceType" class="form-select bg-light border-0">
+                            <option value="">Toutes</option>
+                            {% for type in resource_types %}
+                            <option value="{{ type }}" {% if filters.get('resourceType') == type %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">VENDEUR</label>
+                        <input type="text" name="sellerId" value="{{ filters.get('sellerId', '') }}" class="form-control bg-light border-0" placeholder="sellerId">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">ACHETEUR</label>
+                        <input type="text" name="customerId" value="{{ filters.get('customerId', '') }}" class="form-control bg-light border-0" placeholder="customerId">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">DEBUT</label>
+                        <input type="date" name="from" value="{{ filters.get('from', '') }}" class="form-control bg-light border-0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">FIN</label>
+                        <input type="date" name="to" value="{{ filters.get('to', '') }}" class="form-control bg-light border-0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">LIMITE</label>
+                        <input type="number" min="1" max="200" name="limit" value="{{ filters.get('limit', 50) }}" class="form-control bg-light border-0">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-dark w-100 fw-bold">FILTRER</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white">SOLDE VENDEUR</div>
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('finance.balance_lookup') }}" class="mb-3">
+                    <label class="form-label small fw-bold">SELLER ID</label>
+                    <div class="input-group">
+                        <input type="text" name="sellerId" value="{{ balance_seller_id or '' }}" class="form-control bg-light border-0" placeholder="uuid vendeur" required>
+                        <button class="btn btn-dark" type="submit">Voir</button>
+                    </div>
+                </form>
+
+                {% if balance %}
+                <div class="small text-muted mb-3">Solde de {{ balance_seller_id }}</div>
+                <div class="d-flex justify-content-between mb-2"><span>Recu</span><strong>{{ dollars_from_cents(balance.get('totalReceivedCents')) }}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span>Verse</span><strong>{{ dollars_from_cents(balance.get('totalPaidOutCents')) }}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span>Commissions</span><strong>{{ dollars_from_cents(balance.get('totalCommissionsCents')) }}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span>Rembourse</span><strong>{{ dollars_from_cents(balance.get('totalRefundedCents')) }}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span>Pending payout</span><strong>{{ dollars_from_cents(balance.get('pendingPayoutCents')) }}</strong></div>
+                <div class="d-flex justify-content-between"><span>Litiges</span><strong>{{ dollars_from_cents(balance.get('disputedCents')) }}</strong></div>
+                {% else %}
+                <div class="text-muted small">Saisis un vendeur pour appeler `/api/finance/admin/balance/:sellerId`.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label">REMBOURSEMENTS</div>
+                <h4 class="fw-bold text-danger mb-0">{% if stats.get('totalRefunded') is not none %}${{ '%.2f'|format(stats.get('totalRefunded')) }}{% else %}{{ dollars_from_cents(stats.get('totalRefundedCents')) }}{% endif %}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label">LITIGES GELES</div>
+                <h4 class="fw-bold text-warning mb-0">{% if stats.get('disputed') is not none %}${{ '%.2f'|format(stats.get('disputed')) }}{% else %}{{ dollars_from_cents(stats.get('disputedCents')) }}{% endif %}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="info-label">ENTREES FILTREES</div>
+                <h4 class="fw-bold text-dark mb-0">{{ summary.get('totalEntries', entries|length) }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span>JOURNAL COMPLET</span>
+        {% if summary.get('byType') %}
+        <span class="text-muted small">{{ summary.get('byType') }}</span>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">TYPE</th>
+                        <th>RESSOURCE</th>
+                        <th>VENDEUR / ACHETEUR</th>
+                        <th>MONTANTS</th>
+                        <th>STRIPE</th>
+                        <th class="pe-4">DATE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="badge bg-dark bg-opacity-10 text-dark">{{ entry.get('entryType') }}</span>
+                            <div class="small text-muted mt-1">{{ entry.get('id', '')[:12] }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold small">{{ entry.get('resourceType') }}</div>
+                            <code class="small text-muted">{{ entry.get('resourceId', '')[:14] }}</code>
+                        </td>
+                        <td>
+                            <div class="small"><strong>S</strong> {{ entry.get('sellerId', '')[:12] }}</div>
+                            <div class="small text-muted"><strong>C</strong> {{ entry.get('customerId', '')[:12] }}</div>
+                        </td>
+                        <td>
+                            <div class="small">Brut: <strong>{{ dollars_from_cents(entry.get('grossAmountCents')) }}</strong></div>
+                            <div class="small text-success">Fee: {{ dollars_from_cents(entry.get('platformFeeCents')) }}</div>
+                            <div class="small text-muted">Net: {{ dollars_from_cents(entry.get('sellerNetAmountCents')) }}</div>
+                        </td>
+                        <td>
+                            <div class="small text-muted">{{ entry.get('stripePaymentIntentId') or entry.get('stripeTransferId') or entry.get('stripeRefundId') or entry.get('stripeSessionId') or 'N/A' }}</div>
+                        </td>
+                        <td class="pe-4 small text-muted">{{ entry.get('createdAt') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">Aucune ecriture trouvee.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if next_cursor %}
+<div class="d-flex justify-content-end mt-3">
+    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('finance.index') }}?{{ next_page_query }}">Page suivante</a>
+</div>
+{% endif %}
+{% endblock %}

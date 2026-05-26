@@ -15,11 +15,11 @@
                     <option value="product" {{ 'selected' if item_type == 'product' }}>📦 PRODUITS</option>
                     <option value="service" {{ 'selected' if item_type == 'service' }}>🛠️ SERVICES</option>
                 </select>
+                <input type="hidden" name="limit" value="{{ limit or 20 }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label small fw-bold">STATUT DE RÉVISION</label>
                 <select name="status" class="form-select bg-light border-0">
-                    <option value="">Tous les statuts</option>
                     <option value="pending" {{ 'selected' if status == 'pending' }}>🟡 EN ATTENTE</option>
                     <option value="approved" {{ 'selected' if status == 'approved' }}>🟢 APPROUVÉS</option>
                     <option value="rejected" {{ 'selected' if status == 'rejected' }}>🔴 REJETÉS</option>
@@ -48,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in data %}
+                        {% for item in items %}
                         <tr>
                             <td class="fw-bold">{{ item.name }}</td>
                             <td>
@@ -71,6 +71,11 @@
             </div>
         </div>
     </div>
+    {% if next_cursor %}
+    <div class="d-flex justify-content-end mt-3">
+        <a class="btn btn-sm btn-outline-dark" href="{{ url_for('moderation.index', type=item_type, status=status, limit=limit, cursor=next_cursor) }}">Page suivante</a>
+    </div>
+    {% endif %}
 {% else %}
     <div class="row g-4">
         <!-- Produits -->
@@ -128,5 +133,15 @@
             </div>
         </div>
     </div>
+    {% if next_cursor_products or next_cursor_services %}
+    <div class="d-flex justify-content-end mt-3 gap-2">
+        {% if next_cursor_products %}
+        <a class="btn btn-sm btn-outline-dark" href="{{ url_for('moderation.index', type='product', status=status, limit=limit, cursor=next_cursor_products) }}">Produits suivants</a>
+        {% endif %}
+        {% if next_cursor_services %}
+        <a class="btn btn-sm btn-outline-dark" href="{{ url_for('moderation.index', type='service', status=status, limit=limit, cursor=next_cursor_services) }}">Services suivants</a>
+        {% endif %}
+    </div>
+    {% endif %}
 {% endif %}
 {% endblock %}

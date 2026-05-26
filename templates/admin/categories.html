@@ -7,6 +7,24 @@
     <h2 class="page-title mb-0">Management des Catégories</h2>
 </div>
 
+<form method="GET" class="row g-2 align-items-end mb-4">
+    <div class="col-md-5">
+        <label class="form-label small fw-bold text-uppercase">Recherche serveur</label>
+        <input type="text" name="q" value="{{ current_q or '' }}" class="form-control bg-light border-0" placeholder="Nom de categorie">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label small fw-bold text-uppercase">Scope</label>
+        <select name="scope" class="form-select bg-light border-0">
+            <option value="">Tous</option>
+            <option value="PRODUCT" {% if current_scope == 'PRODUCT' %}selected{% endif %}>PRODUITS</option>
+            <option value="SERVICE" {% if current_scope == 'SERVICE' %}selected{% endif %}>SERVICES</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-dark w-100 fw-bold">FILTRER</button>
+    </div>
+</form>
+
 <div class="row g-4">
     <!-- Formulaire de Création -->
     <div class="col-lg-4">

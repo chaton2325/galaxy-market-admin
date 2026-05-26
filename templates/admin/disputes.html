@@ -19,6 +19,7 @@
                     <option value="OPEN" {{ 'selected' if current_status == 'OPEN' }}>🔴 DOSSIERS OUVERTS (OPEN)</option>
                     <option value="CLOSED" {{ 'selected' if current_status == 'CLOSED' }}>🟢 DOSSIERS CLÔTURÉS (CLOSED)</option>
                 </select>
+                <input type="hidden" name="limit" value="{{ limit or 20 }}">
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-gold w-100">FILTRER</button>
@@ -102,6 +103,12 @@
         </div>
     </div>
 </div>
+
+{% if next_cursor %}
+<div class="d-flex justify-content-end mt-3">
+    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('disputes.index', status=current_status, limit=limit, cursor=next_cursor) }}">Page suivante</a>
+</div>
+{% endif %}
 
 <!-- Modal Création -->
 <div class="modal fade" id="createDisputeModal" tabindex="-1">

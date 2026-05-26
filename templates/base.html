@@ -59,6 +59,11 @@
                         <i class="fas fa-exclamation-circle"></i> Litiges
                     </a>
                 </li>
+                <li class="{{ 'active' if 'finance' in request.endpoint }}">
+                    <a href="{{ url_for('finance.index') }}">
+                        <i class="fas fa-book"></i> Finance
+                    </a>
+                </li>
                 <li class="{{ 'active' if 'categories' in request.endpoint }}">
                     <a href="{{ url_for('categories.index') }}">
                         <i class="fas fa-tags"></i> Catégories

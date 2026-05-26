@@ -85,14 +85,33 @@
             </div>
         </div>
 
+        <div class="card border-0 mb-4 shadow-sm">
+            <div class="card-header bg-white">MODIFICATION RAPIDE</div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('products.update_product', product_id=product.get('id')) }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small">Nom</label>
+                        <input type="text" name="name" class="form-control form-control-sm" value="{{ product.get('name', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Prix</label>
+                        <input type="number" step="0.01" name="price" class="form-control form-control-sm" value="{{ product.get('price', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Quantite</label>
+                        <input type="number" name="quantity" class="form-control form-control-sm" value="{{ product.get('quantity', '') }}">
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 btn-sm fw-bold">METTRE A JOUR</button>
+                </form>
+            </div>
+        </div>
+
         <div class="danger-zone shadow-sm">
             <h6 class="text-danger fw-bold mb-3 small">ZONE DE DANGER</h6>
             <form action="{{ url_for('products.archive_product', product_id=product.get('id')) }}" method="POST" class="mb-2">
-                <input type="hidden" name="ownerId" value="{{ product.get('ownerId') }}">
                 <button type="submit" class="btn btn-outline-warning w-100 btn-sm fw-bold">ARCHIVER LE PRODUIT</button>
             </form>
             <form action="{{ url_for('products.delete_product', product_id=product.get('id')) }}" method="POST">
-                <input type="hidden" name="ownerId" value="{{ product.get('ownerId') }}">
                 <button type="submit" class="btn btn-danger w-100 btn-sm fw-bold" onclick="return confirm('Confirmer la suppression ?')">SUPPRIMER DÉFINITIVEMENT</button>
             </form>
         </div>

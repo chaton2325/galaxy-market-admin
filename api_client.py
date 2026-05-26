@@ -2,7 +2,8 @@ import requests
 from flask import session, redirect, url_for, flash
 
 class APIClient:
-    BASE_URL = "http://localhost:3000/api/admin"
+    BASE_URL = "http://galaxy.mirhosty.com/api/admin"
+    FINANCE_BASE_URL = "http://galaxy.mirhosty.com/api/finance"
 
     @staticmethod
     def get_headers():
@@ -15,6 +16,10 @@ class APIClient:
     @classmethod
     def request(cls, method, endpoint, **kwargs):
         url = f"{cls.BASE_URL}{endpoint}"
+        return cls.request_url(method, url, **kwargs)
+
+    @classmethod
+    def request_url(cls, method, url, **kwargs):
         headers = cls.get_headers()
         
         # Merge headers if provided in kwargs
@@ -34,6 +39,11 @@ class APIClient:
             return None
 
     @classmethod
+    def finance_request(cls, method, endpoint, **kwargs):
+        url = f"{cls.FINANCE_BASE_URL}{endpoint}"
+        return cls.request_url(method, url, **kwargs)
+
+    @classmethod
     def get(cls, endpoint, params=None):
         return cls.request('GET', endpoint, params=params)
 
@@ -48,3 +58,7 @@ class APIClient:
     @classmethod
     def delete(cls, endpoint, params=None):
         return cls.request('DELETE', endpoint, params=params)
+
+    @classmethod
+    def finance_get(cls, endpoint, params=None):
+        return cls.finance_request('GET', endpoint, params=params)

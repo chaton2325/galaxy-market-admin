@@ -11,24 +11,29 @@ def check_auth():
 @disputes_bp.route('/')
 def index():
     status = request.args.get('status')
-    params = {}
+    limit = request.args.get('limit', 20)
+    cursor = request.args.get('cursor')
+    params = {'limit': limit}
     if status: params['status'] = status
+    if cursor: params['cursor'] = cursor
     
     response = APIClient.get('/disputes', params=params)
     disputes = []
+    next_cursor = None
     if response and response.status_code == 200:
         data = response.json()
         if isinstance(data, list):
             disputes = data
         elif isinstance(data, dict):
             disputes = data.get('disputes') or data.get('data') or []
+            next_cursor = data.get('nextCursor')
             
         # Normalization
         for d in disputes:
             if isinstance(d, dict) and 'id' not in d and '_id' in d:
                 d['id'] = d['_id']
                 
-    return render_template('admin/disputes.html', disputes=disputes, current_status=status)
+    return render_template('admin/disputes.html', disputes=disputes, current_status=status, next_cursor=next_cursor, limit=limit, cursor=cursor)
 
 @disputes_bp.route('/create', methods=['POST'])
 def create():

@@ -28,13 +28,22 @@ def index():
             flash('Erreur lors de la création.', 'danger')
         return redirect(url_for('categories.index'))
 
-    # Fetch categories
-    response = APIClient.get('/categories')
+    params = {}
+    scope = request.args.get('scope')
+    q = request.args.get('q')
+    if scope: params['scope'] = scope
+    if q: params['q'] = q
+
+    response = APIClient.get('/categories', params=params)
     categories = []
     if response and response.status_code == 200:
-        categories = response.json()
+        data = response.json()
+        if isinstance(data, list):
+            categories = data
+        elif isinstance(data, dict):
+            categories = data.get('categories') or data.get('data') or []
     
-    return render_template('admin/categories.html', categories=categories)
+    return render_template('admin/categories.html', categories=categories, current_scope=scope, current_q=q)
 
 @categories_bp.route('/<cat_id>', methods=['POST'])
 def update(cat_id):

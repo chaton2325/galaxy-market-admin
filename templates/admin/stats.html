@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Statistiques & Métriques</h2>
+    <div class="text-muted small fw-bold">DERNIÈRE MISE À JOUR : <span class="text-dark">AUJOURD'HUI</span></div>
+</div>
+
+<!-- Cartes Métriques Premium (Rangée 1) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm overflow-hidden h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">UTILISATEURS</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('totalUsers', 0) }}</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <span class="text-success fw-bold">{{ metrics.get('activeUsers', 0) }}</span> actifs • <span class="text-danger fw-bold">{{ metrics.get('suspendedUsers', 0) }}</span> suspendus
+                </div>
+                <div class="mt-1 small text-muted">
+                    +{{ metrics.get('newUsersLast7Days', 0) }} ces 7 derniers jours
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm overflow-hidden h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">MODÉRATION</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('pendingModeration', 0) }}</h3>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <span class="fw-bold">{{ metrics.get('pendingProducts', 0) }}</span> produits • <span class="fw-bold">{{ metrics.get('pendingServices', 0) }}</span> services
+                </div>
+                <div class="mt-1 small text-muted">En attente de révision</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm overflow-hidden h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">LITIGES OUVERTS</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('openDisputes', 0) }}</h3>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small text-muted">
+                    {{ metrics.get('closedDisputesLast30Days', 0) }} résolus (30j)
+                </div>
+                <div class="mt-1 small text-danger fw-bold">Actions requises</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm overflow-hidden h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="info-label mb-1">VENDEURS STRIPE</div>
+                        <h3 class="fw-bold mb-0 text-dark">{{ metrics.get('sellers', {}).get('withStripeAccount', 0) }}</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 48px;">
+                        <i class="fab fa-stripe-s"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small text-muted">
+                    {{ metrics.get('sellers', {}).get('withoutStripeAccount', 0) }} sans compte Stripe
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métriques Commerce (Rangée 2) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-bold small text-uppercase">Statistiques Commandes ({{ metrics.get('totalOrders', 0) }} total)</div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {% set o = metrics.get('orders', {}) %}
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">ATTENTE PAIEMENT</div>
+                        <div class="fw-bold">{{ o.get('awaitingPayment', 0) }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">PAYÉES</div>
+                        <div class="fw-bold">{{ o.get('paid', 0) }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">EXPÉDIÉES</div>
+                        <div class="fw-bold">{{ o.get('shipped', 0) }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">LIVRÉES</div>
+                        <div class="fw-bold">{{ o.get('delivered', 0) }}</div>
+                    </div>
+                    <div class="col-4 text-success">
+                        <div class="info-label" style="font-size: 0.65rem;">COMPLÉTÉES</div>
+                        <div class="fw-bold">{{ o.get('completed', 0) }}</div>
+                    </div>
+                    <div class="col-4 text-danger">
+                        <div class="info-label" style="font-size: 0.65rem;">ANNULÉES</div>
+                        <div class="fw-bold">{{ o.get('cancelled', 0) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-bold small text-uppercase">Statistiques Factures ({{ metrics.get('totalInvoices', 0) }} total)</div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {% set i = metrics.get('invoices', {}) %}
+                    <div class="col-4 text-warning">
+                        <div class="info-label" style="font-size: 0.65rem;">EN ATTENTE</div>
+                        <div class="fw-bold">{{ i.get('pending', 0) }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">PAYÉES</div>
+                        <div class="fw-bold">{{ i.get('paid', 0) }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="info-label text-muted" style="font-size: 0.65rem;">LIVRÉES</div>
+                        <div class="fw-bold">{{ i.get('delivered', 0) }}</div>
+                    </div>
+                    <div class="col-4 text-success">
+                        <div class="info-label" style="font-size: 0.65rem;">COMPLÉTÉES</div>
+                        <div class="fw-bold">{{ i.get('completed', 0) }}</div>
+                    </div>
+                    <div class="col-4 text-danger">
+                        <div class="info-label" style="font-size: 0.65rem;">REMBOURSÉES</div>
+                        <div class="fw-bold">{{ i.get('refunded', 0) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Graphique Finance -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-bold small text-uppercase">PERFORMANCE FINANCIÈRE (VOLUMES)</div>
+            <div class="card-body p-4">
+                <div class="row mb-4 text-center">
+                    <div class="col-3">
+                        <div class="info-label small">ORDERS TOTAL</div>
+                        <div class="fw-bold text-primary">${{ metrics.get('finance', {}).get('orderVolume', 0) }}</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="info-label small">ORDERS COMPLÉTÉ</div>
+                        <div class="fw-bold text-success">${{ metrics.get('finance', {}).get('completedOrderVolume', 0) }}</div>
+                    </div>
+                    <div class="col-3 border-start">
+                        <div class="info-label small">INVOICES TOTAL</div>
+                        <div class="fw-bold text-primary">${{ metrics.get('finance', {}).get('invoiceVolume', 0) }}</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="info-label small">INVOICES COMPLÉTÉ</div>
+                        <div class="fw-bold text-success">${{ metrics.get('finance', {}).get('completedInvoiceVolume', 0) }}</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Répartition Users -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-bold small text-uppercase">MIX UTILISATEURS</div>
+            <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="usersChart"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <div class="badge badge-gold">SÉCURITÉ OPTIMISÉE</div>
+                    <p class="small text-muted mt-2">Vérification des accès en temps réel.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { font: { family: 'Inter', size: 11, weight: '600' } } } }
+        };
+
+        const financeCtx = document.getElementById('financeChart').getContext('2d');
+        new Chart(financeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['COMMANDES', 'FACTURES'],
+                datasets: [
+                    {
+                        label: 'Volume Total ($)',
+                        data: [
+                            {{ metrics.get('finance', {}).get('orderVolume', 0) }},
+                            {{ metrics.get('finance', {}).get('invoiceVolume', 0) }}
+                        ],
+                        backgroundColor: '#bf953f'
+                    },
+                    {
+                        label: 'Volume Complété ($)',
+                        data: [
+                            {{ metrics.get('finance', {}).get('completedOrderVolume', 0) }},
+                            {{ metrics.get('finance', {}).get('completedInvoiceVolume', 0) }}
+                        ],
+                        backgroundColor: '#0ca678'
+                    }
+                ]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        new Chart(usersCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['ACTIFS', 'SUSPENDUS'],
+                datasets: [{
+                    data: [{{ metrics.get('activeUsers', 0) }}, {{ metrics.get('suspendedUsers', 0) }}],
+                    backgroundColor: ['#0ca678', '#fa5252'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                ...commonOptions,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20 } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
