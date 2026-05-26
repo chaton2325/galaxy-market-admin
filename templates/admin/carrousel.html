@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}Carrousel{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Carrousel Homepage</h2>
+    <div class="text-muted small fw-bold">{{ items|length }} bannieres</div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">NOUVELLE BANNIERE</div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('carrousel.create') }}" method="POST" enctype="multipart/form-data" id="createCarouselForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">SOURCE</label>
+                        <select name="sourceType" id="sourceTypeCreate" class="form-select bg-light border-0" required>
+                            <option value="MANUAL">MANUAL</option>
+                            <option value="PRODUCT">PRODUCT</option>
+                            <option value="SERVICE">SERVICE</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="productSourceGroup">
+                        <label class="form-label small fw-bold">PRODUIT A METTRE EN AVANT</label>
+                        <input type="hidden" name="productSourceId" id="productSourceId">
+                        <div class="input-group">
+                            <input type="text" id="productSourceLabel" class="form-control bg-light border-0" placeholder="Aucun produit selectionne" readonly>
+                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#productPickerModal">Choisir</button>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-none" id="serviceSourceGroup">
+                        <label class="form-label small fw-bold">SERVICE A METTRE EN AVANT</label>
+                        <input type="hidden" name="serviceSourceId" id="serviceSourceId">
+                        <div class="input-group">
+                            <input type="text" id="serviceSourceLabel" class="form-control bg-light border-0" placeholder="Aucun service selectionne" readonly>
+                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#servicePickerModal">Choisir</button>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="manualImageGroup">
+                        <label class="form-label small fw-bold">IMAGE MANUAL</label>
+                        <input type="file" name="file" id="manualImageFile" class="form-control bg-light border-0" accept="image/jpeg,image/png,image/webp">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">TITRE</label>
+                        <input type="text" name="title" class="form-control bg-light border-0" placeholder="Promo du mois">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">SOUS-TITRE</label>
+                        <textarea name="subtitle" class="form-control bg-light border-0" rows="2" placeholder="Jusqu'a -50%"></textarea>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">CTA</label>
+                            <input type="text" name="ctaLabel" class="form-control bg-light border-0" placeholder="Decouvrir">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold">POSITION</label>
+                            <input type="number" name="position" value="0" class="form-control bg-light border-0">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">LIEN CTA</label>
+                        <input type="url" name="ctaLink" class="form-control bg-light border-0" placeholder="https://app.com/promo">
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 fw-bold">CREER</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">BANNIERES CONFIGUREES</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">BANNIERE</th>
+                                <th>SOURCE</th>
+                                <th>POSITION</th>
+                                <th>STATUT</th>
+                                <th class="text-end pe-4">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        {% if item.get('imageUrl') %}
+                                        <img src="{{ item.get('imageUrl') }}" alt="{{ item.get('title', 'Banniere') }}" class="rounded me-3" style="width: 72px; height: 44px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 72px; height: 44px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ item.get('title', 'Sans titre') }}</div>
+                                            <div class="small text-muted">{{ item.get('subtitle', '')[:70] }}</div>
+                                            <code class="small text-muted">{{ item.get('id', '')[:12] }}</code>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark bg-opacity-10 text-dark">{{ item.get('sourceType', 'MANUAL') }}</span>
+                                    {% if item.get('sourceId') %}
+                                    <div class="small text-muted mt-1">{{ item.get('sourceId')[:12] }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold">{{ item.get('position', 0) }}</td>
+                                <td>
+                                    {% if item.get('isActive') %}
+                                    <span class="badge badge-soft-success">ACTIVE</span>
+                                    {% else %}
+                                    <span class="badge badge-soft-danger">INACTIVE</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#editCarousel{{ item.get('id') }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    {% if item.get('sourceType') == 'MANUAL' %}
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#imageCarousel{{ item.get('id') }}">
+                                        <i class="fas fa-image"></i>
+                                    </button>
+                                    {% endif %}
+                                    <form action="{{ url_for('carrousel.delete', carousel_id=item.get('id')) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette banniere ?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="editCarousel{{ item.get('id') }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content border-0">
+                                        <form action="{{ url_for('carrousel.update', carousel_id=item.get('id')) }}" method="POST">
+                                            <div class="modal-header bg-dark text-white">
+                                                <h5 class="modal-title fw-bold">Modifier la banniere</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="row g-3">
+                                                    <div class="col-md-8">
+                                                        <label class="form-label small fw-bold">Titre</label>
+                                                        <input type="text" name="title" value="{{ item.get('title', '') }}" class="form-control bg-light border-0">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-bold">Position</label>
+                                                        <input type="number" name="position" value="{{ item.get('position', 0) }}" class="form-control bg-light border-0">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="form-label small fw-bold">Sous-titre</label>
+                                                        <textarea name="subtitle" rows="2" class="form-control bg-light border-0">{{ item.get('subtitle', '') }}</textarea>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-bold">CTA</label>
+                                                        <input type="text" name="ctaLabel" value="{{ item.get('ctaLabel', '') }}" class="form-control bg-light border-0">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold">Lien CTA</label>
+                                                        <input type="url" name="ctaLink" value="{{ item.get('ctaLink', '') }}" class="form-control bg-light border-0">
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label small fw-bold">Actif</label>
+                                                        <select name="isActive" class="form-select bg-light border-0">
+                                                            <option value="true" {% if item.get('isActive') %}selected{% endif %}>Oui</option>
+                                                            <option value="false" {% if not item.get('isActive') %}selected{% endif %}>Non</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-dark fw-bold">ENREGISTRER</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if item.get('sourceType') == 'MANUAL' %}
+                            <div class="modal fade" id="imageCarousel{{ item.get('id') }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0">
+                                        <form action="{{ url_for('carrousel.replace_image', carousel_id=item.get('id')) }}" method="POST" enctype="multipart/form-data">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">Remplacer l'image</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="file" name="file" class="form-control bg-light border-0" accept="image/jpeg,image/png,image/webp" required>
+                                            </div>
+                                            <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-primary fw-bold">UPLOADER</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">Aucune banniere configuree.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="productPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">Selectionner un produit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" id="productPickerSearch" class="form-control bg-light border-0" placeholder="Rechercher par nom ou ID">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Produit</th>
+                                <th>ID</th>
+                                <th>Prix</th>
+                                <th>Statut</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productPickerBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between">
+                <div class="text-muted small" id="productPickerCount"></div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="productPickerPrev">Precedent</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="productPickerNext">Suivant</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="servicePickerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">Selectionner un service</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" id="servicePickerSearch" class="form-control bg-light border-0" placeholder="Rechercher par nom ou ID">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service</th>
+                                <th>ID</th>
+                                <th>Prix</th>
+                                <th>Statut</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicePickerBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between">
+                <div class="text-muted small" id="servicePickerCount"></div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="servicePickerPrev">Precedent</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="servicePickerNext">Suivant</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sourceType = document.getElementById('sourceTypeCreate');
+    const productGroup = document.getElementById('productSourceGroup');
+    const serviceGroup = document.getElementById('serviceSourceGroup');
+    const manualImageGroup = document.getElementById('manualImageGroup');
+    const productSelect = document.getElementById('productSourceId');
+    const serviceSelect = document.getElementById('serviceSourceId');
+    const manualFile = document.getElementById('manualImageFile');
+    const createForm = document.getElementById('createCarouselForm');
+
+    function syncSourceFields() {
+        const value = sourceType.value;
+        productGroup.classList.toggle('d-none', value !== 'PRODUCT');
+        serviceGroup.classList.toggle('d-none', value !== 'SERVICE');
+        manualImageGroup.classList.toggle('d-none', value !== 'MANUAL');
+
+        productSelect.required = value === 'PRODUCT';
+        serviceSelect.required = value === 'SERVICE';
+        manualFile.required = value === 'MANUAL';
+    }
+
+    sourceType.addEventListener('change', syncSourceFields);
+    syncSourceFields();
+
+    createForm.addEventListener('submit', function(event) {
+        if (sourceType.value === 'PRODUCT' && !productSelect.value) {
+            event.preventDefault();
+            alert('Selectionne un produit dans la liste.');
+        }
+        if (sourceType.value === 'SERVICE' && !serviceSelect.value) {
+            event.preventDefault();
+            alert('Selectionne un service dans la liste.');
+        }
+    });
+
+    const productItems = {{ products|tojson }};
+    const serviceItems = {{ services|tojson }};
+
+    function setupPicker(config) {
+        let page = 1;
+        const pageSize = 8;
+        const tbody = document.getElementById(config.bodyId);
+        const search = document.getElementById(config.searchId);
+        const count = document.getElementById(config.countId);
+        const prev = document.getElementById(config.prevId);
+        const next = document.getElementById(config.nextId);
+        const valueInput = document.getElementById(config.valueInputId);
+        const labelInput = document.getElementById(config.labelInputId);
+        const modalEl = document.getElementById(config.modalId);
+
+        function itemId(item) {
+            return item.id || item._id || '';
+        }
+
+        function itemName(item) {
+            return item.name || item.title || config.emptyName;
+        }
+
+        function filteredItems() {
+            const term = search.value.trim().toLowerCase();
+            if (!term) return config.items;
+            return config.items.filter(item => {
+                const id = itemId(item).toLowerCase();
+                const name = itemName(item).toLowerCase();
+                return id.includes(term) || name.includes(term);
+            });
+        }
+
+        function render() {
+            const items = filteredItems();
+            const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+            page = Math.min(page, totalPages);
+            const start = (page - 1) * pageSize;
+            const visible = items.slice(start, start + pageSize);
+
+            tbody.innerHTML = '';
+            if (!visible.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Aucun resultat</td></tr>';
+            } else {
+                visible.forEach(item => {
+                    const id = itemId(item);
+                    const name = itemName(item);
+                    const price = item.price || 0;
+                    const status = item.status || item.moderationStatus || 'N/A';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="fw-bold">${name}</td>
+                        <td><code class="small text-muted">${id}</code></td>
+                        <td>$${price}</td>
+                        <td><span class="badge bg-light text-dark border">${status}</span></td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-gold">Selectionner</button>
+                        </td>
+                    `;
+                    tr.querySelector('button').addEventListener('click', function() {
+                        valueInput.value = id;
+                        labelInput.value = `${name} - ${id.slice(0, 8)}`;
+                        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    });
+                    tbody.appendChild(tr);
+                });
+            }
+
+            count.textContent = `${items.length} resultat(s) - page ${page}/${totalPages}`;
+            prev.disabled = page <= 1;
+            next.disabled = page >= totalPages;
+        }
+
+        search.addEventListener('input', function() {
+            page = 1;
+            render();
+        });
+        prev.addEventListener('click', function() {
+            page = Math.max(1, page - 1);
+            render();
+        });
+        next.addEventListener('click', function() {
+            page += 1;
+            render();
+        });
+        modalEl.addEventListener('shown.bs.modal', function() {
+            search.focus();
+        });
+        render();
+    }
+
+    setupPicker({
+        items: productItems,
+        modalId: 'productPickerModal',
+        bodyId: 'productPickerBody',
+        searchId: 'productPickerSearch',
+        countId: 'productPickerCount',
+        prevId: 'productPickerPrev',
+        nextId: 'productPickerNext',
+        valueInputId: 'productSourceId',
+        labelInputId: 'productSourceLabel',
+        emptyName: 'Produit sans nom'
+    });
+
+    setupPicker({
+        items: serviceItems,
+        modalId: 'servicePickerModal',
+        bodyId: 'servicePickerBody',
+        searchId: 'servicePickerSearch',
+        countId: 'servicePickerCount',
+        prevId: 'servicePickerPrev',
+        nextId: 'servicePickerNext',
+        valueInputId: 'serviceSourceId',
+        labelInputId: 'serviceSourceLabel',
+        emptyName: 'Service sans nom'
+    });
+});
+</script>
+{% endblock %}

@@ -10,6 +10,7 @@ from blueprints.audit import audit_bp
 from blueprints.disputes import disputes_bp
 from blueprints.categories import categories_bp
 from blueprints.finance import finance_bp
+from blueprints.carrousel import carrousel_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -25,6 +26,7 @@ app.register_blueprint(audit_bp, url_prefix='/audit')
 app.register_blueprint(disputes_bp, url_prefix='/disputes')
 app.register_blueprint(categories_bp, url_prefix='/categories')
 app.register_blueprint(finance_bp, url_prefix='/finance')
+app.register_blueprint(carrousel_bp, url_prefix='/carrousel')
 
 @app.route('/')
 def index():

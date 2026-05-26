@@ -2,8 +2,9 @@ import requests
 from flask import session, redirect, url_for, flash
 
 class APIClient:
-    BASE_URL = "http://galaxy.mirhosty.com/api/admin"
-    FINANCE_BASE_URL = "http://galaxy.mirhosty.com/api/finance"
+    BASE_URL = "https://galaxy.mirhosty.com/api/admin"
+    FINANCE_BASE_URL = "https://galaxy.mirhosty.com/api/finance"
+    CARROUSEL_BASE_URL = "https://galaxy.mirhosty.com/api/carrousel"
 
     @staticmethod
     def get_headers():
@@ -44,6 +45,11 @@ class APIClient:
         return cls.request_url(method, url, **kwargs)
 
     @classmethod
+    def carrousel_request(cls, method, endpoint='', **kwargs):
+        url = f"{cls.CARROUSEL_BASE_URL}{endpoint}"
+        return cls.request_url(method, url, **kwargs)
+
+    @classmethod
     def get(cls, endpoint, params=None):
         return cls.request('GET', endpoint, params=params)
 
@@ -62,3 +68,19 @@ class APIClient:
     @classmethod
     def finance_get(cls, endpoint, params=None):
         return cls.finance_request('GET', endpoint, params=params)
+
+    @classmethod
+    def carrousel_get(cls, endpoint='', params=None):
+        return cls.carrousel_request('GET', endpoint, params=params)
+
+    @classmethod
+    def carrousel_post(cls, endpoint='', json=None, data=None, files=None):
+        return cls.carrousel_request('POST', endpoint, json=json, data=data, files=files)
+
+    @classmethod
+    def carrousel_patch(cls, endpoint='', json=None, data=None, files=None):
+        return cls.carrousel_request('PATCH', endpoint, json=json, data=data, files=files)
+
+    @classmethod
+    def carrousel_delete(cls, endpoint=''):
+        return cls.carrousel_request('DELETE', endpoint)
